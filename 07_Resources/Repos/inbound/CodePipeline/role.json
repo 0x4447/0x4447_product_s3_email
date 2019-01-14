@@ -1,0 +1,20 @@
+{
+	"PipelineInboundRole": {
+		"Type": "AWS::IAM::Role",
+		"Properties": {
+			"RoleName": "0x4447_s3_email_codepipeline_inbound",
+			"AssumeRolePolicyDocument": {
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Effect": "Allow",
+						"Principal": {
+							"Service": "codepipeline.amazonaws.com"
+						},
+						"Action": "sts:AssumeRole"
+					}
+				]
+			}
+		}
+	}
+}

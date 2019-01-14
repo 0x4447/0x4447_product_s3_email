@@ -1,0 +1,10 @@
+{
+	"S3ConverterPermission": {
+		"Type": "AWS::Lambda::Permission",
+		"Properties": {
+			"Action": "lambda:invokeFunction",
+			"FunctionName": { "Ref": "LambdaEmailConverter" },
+			"Principal": "s3.amazonaws.com"
+		}
+	}
+}

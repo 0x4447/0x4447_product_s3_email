@@ -1,0 +1,21 @@
+{
+	"CodeBuildDeployPolicyLambdaUpdate": {
+		"Type": "AWS::IAM::Policy",
+		"Properties": {
+			"Roles": [
+				{ "Ref": "CodeBuildDeployRole" }
+			],
+			"PolicyName": "update_lambda_code",
+			"PolicyDocument": {
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Effect": "Allow",
+						"Action": "lambda:UpdateFunctionCode",
+						"Resource": { "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailInbound}"}
+					}
+				]
+			}
+		}
+	}
+}

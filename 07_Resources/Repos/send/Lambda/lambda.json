@@ -1,0 +1,19 @@
+{
+	"LambdaEmailSend": {
+		"Type": "AWS::Lambda::Function",
+		"Description": "This Lambda will send out the Raw email using SES.",
+		"Properties": {
+			"FunctionName": "0x4447-s3-email-send",
+			"Code": {
+				"ZipFile": { "Fn::Join": ["", [
+					"exports.handler = async (event) => {return true;};"
+				]]}
+			},
+			"Handler": "index.handler",
+			"MemorySize": 128,
+			"Role": { "Fn::GetAtt": ["LambdaEmailSendRole", "Arn"] },
+			"Runtime": "nodejs8.10",
+			"Timeout": 60
+		}
+	}
+}

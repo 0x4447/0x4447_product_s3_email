@@ -1,0 +1,25 @@
+	 {
+	"CodeBuildInstall": {
+		"Type": "AWS::CodeBuild::Project",
+		"Properties": {
+			"Name": "0x4447_s3_email_inbound_install",
+			"ServiceRole": { "Fn::GetAtt": ["CodeBuildInstallRole", "Arn"] },
+			"TimeoutInMinutes": 60,
+			"Source": {
+				"Type": "CODEPIPELINE",
+				"BuildSpec": "buildspec-setup.yml"
+			},
+			"Artifacts": {
+				"Type": "CODEPIPELINE"
+			},
+			"Environment": {
+				"Type": "LINUX_CONTAINER",
+				"ComputeType": "BUILD_GENERAL1_SMALL",
+				"Image": "aws/codebuild/nodejs:8.11.0",
+				"EnvironmentVariables": [
+					{ "Name": "STAGE", "Type": "PLAINTEXT", "Value": "production" }
+				]
+			}
+		}
+	}
+}

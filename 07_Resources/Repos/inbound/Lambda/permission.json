@@ -1,0 +1,11 @@
+{
+	"S3InboundPermission": {
+		"Type": "AWS::Lambda::Permission",
+		"Properties": {
+			"Action": "lambda:InvokeFunction",
+			"FunctionName": { "Ref": "LambdaEmailInbound" },
+			"Principal": "ses.amazonaws.com",
+			"SourceAccount": { "Ref": "AWS::AccountId" }
+		}
+	}
+}

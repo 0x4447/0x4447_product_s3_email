@@ -1,0 +1,48 @@
+{
+	"S3Email": {
+		"Type": "AWS::S3::Bucket",
+		"Properties": {
+			"BucketName": { "Fn::Sub": "${EmailRestingPlace}" },
+			"NotificationConfiguration": {
+				"LambdaConfigurations": [
+					{
+						"Function": { "Fn::GetAtt": [ "LambdaEmailOutbound", "Arn" ] },
+						"Event": "s3:ObjectCreated:Put",
+						"Filter": {
+							"S3Key": {
+								"Rules": [{
+									"Name": "prefix",
+									"Value": "_outbound/"
+								}]
+							}
+						}
+					},
+					{
+						"Function": { "Fn::GetAtt": [ "LambdaEmailSend", "Arn" ] },
+						"Event": "s3:ObjectCreated:Put",
+						"Filter": {
+							"S3Key": {
+								"Rules": [{
+									"Name": "prefix",
+									"Value": "sent/"
+								}]
+							}
+						}
+					},
+					{
+						"Function": { "Fn::GetAtt": [ "LambdaEmailConverter", "Arn" ] },
+						"Event": "s3:ObjectCreated:Put",
+						"Filter": {
+							"S3Key": {
+								"Rules": [{
+									"Name": "prefix",
+									"Value": "inbox/"
+								}]
+							}
+						}
+					}
+				]
+			}
+		}
+	}
+}

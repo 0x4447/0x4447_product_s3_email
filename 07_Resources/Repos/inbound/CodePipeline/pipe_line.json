@@ -1,0 +1,98 @@
+{
+	"PipelineInbound": {
+		"Type": "AWS::CodePipeline::Pipeline",
+		"Properties": {
+			"Name": "0x4447-product-s3-email-lambda-inbound",
+			"ArtifactStore": {
+				"Location": { "Ref": "S3Code" },
+				"Type": "S3"
+			},
+			"RoleArn": {
+				"Fn::GetAtt": [
+					"PipelineInboundRole",
+					"Arn"
+				]
+			},
+			"Stages": [
+				{
+					"Name": "Get",
+					"Actions": [
+						{
+							"Name": "Source",
+							"RunOrder": 1,
+							"ActionTypeId": {
+								"Category": "Source",
+								"Owner": "ThirdParty",
+								"Provider": "GitHub",
+								"Version": "1"
+							},
+							"Configuration": {
+								"Owner": "0x4447",
+								"Repo": "0x4447-product-s3-email-lambda-inbound",
+								"Branch": "master",
+								"PollForSourceChanges": true,
+								"OAuthToken": { "Ref": "GitHubToken" }
+							},
+							"OutputArtifacts": [
+								{
+									"Name": "source_code"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Name": "Prepare",
+					"Actions": [
+						{
+							"Name": "Install",
+							"RunOrder": 1,
+							"InputArtifacts": [
+								{
+									"Name": "source_code"
+								}
+							],
+							"Configuration": {
+								"ProjectName": { "Ref": "CodeBuildInstall" }
+							},
+							"ActionTypeId": {
+								"Category": "Build",
+								"Owner": "AWS",
+								"Provider": "CodeBuild",
+								"Version": "1"
+							},
+							"OutputArtifacts": [
+								{
+									"Name": "prepared"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Name": "Deploy",
+					"Actions": [
+						{
+							"Name": "CodeBuild",
+							"RunOrder": 1,
+							"InputArtifacts": [
+								{
+									"Name": "prepared"
+								}
+							],
+							"Configuration": {
+								"ProjectName": { "Ref": "CodeBuildDeploy" }
+							},
+							"ActionTypeId": {
+								"Category": "Build",
+								"Owner": "AWS",
+								"Provider": "CodeBuild",
+								"Version": "1"
+							}
+						}
+					]
+				}
+			]
+		}
+	}
+}

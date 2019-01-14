@@ -1,0 +1,17 @@
+{
+	"SESReceiptRule": {
+		"Type": "AWS::SES::ReceiptRule",
+		"Properties": {
+			"RuleSetName": { "Ref": "SESReceiptRuleSet"},
+			"Rule": {
+				"Name": "Inbound",
+				"Actions": [{
+					"LambdaAction": {
+						"FunctionArn": { "Fn::GetAtt": ["LambdaEmailInbound", "Arn"]}
+					}
+				}],
+				"Enabled": true
+			}
+		}
+	}
+}

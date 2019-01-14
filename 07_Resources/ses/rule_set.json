@@ -1,0 +1,8 @@
+{
+	"SESReceiptRuleSet": {
+		"Type": "AWS::SES::ReceiptRuleSet",
+		"Properties": {
+			"RuleSetName": "Default"
+		}
+	}
+}

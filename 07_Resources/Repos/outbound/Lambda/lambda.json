@@ -1,0 +1,19 @@
+{
+	"LambdaEmailOutbound": {
+		"Type": "AWS::Lambda::Function",
+		"Description": "This Lambda will convert a JSON formated email in to a proper one ready to be sent.",
+		"Properties": {
+			"FunctionName": "0x4447-s3-email-outbound",
+			"Code": {
+				"ZipFile": { "Fn::Join": ["", [
+					"exports.handler = async (event) => {return true;};"
+				]]}
+			},
+			"Handler": "index.handler",
+			"MemorySize": 128,
+			"Role": { "Fn::GetAtt": ["LambdaEmailOutboundRole", "Arn"] },
+			"Runtime": "nodejs8.10",
+			"Timeout": 60
+		}
+	}
+}
