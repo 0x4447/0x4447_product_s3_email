@@ -16,6 +16,44 @@
 		}
 	},
 	"Resources": {
+		"SESReceiptRule": {
+			"Type": "AWS::SES::ReceiptRule",
+			"Properties": {
+				"RuleSetName": {
+					"Ref": "SESReceiptRuleSet"
+				},
+				"Rule": {
+					"Name": "Inbound",
+					"Actions": [
+						{
+							"LambdaAction": {
+								"FunctionArn": {
+									"Fn::GetAtt": [
+										"LambdaEmailInbound",
+										"Arn"
+									]
+								}
+							}
+						},
+						{
+							"S3Action": {
+								"BucketName": {
+									"Ref": "S3Email"
+								},
+								"ObjectKeyPrefix": "_inbound"
+							}
+						}
+					],
+					"Enabled": true
+				}
+			}
+		},
+		"SESReceiptRuleSet": {
+			"Type": "AWS::SES::ReceiptRuleSet",
+			"Properties": {
+				"RuleSetName": "Default"
+			}
+		},
 		"S3Code": {
 			"Type": "AWS::S3::Bucket",
 			"Properties": {
@@ -93,34 +131,35 @@
 				}
 			}
 		},
-		"SESReceiptRule": {
-			"Type": "AWS::SES::ReceiptRule",
+		"S3EmailPolicy": {
+			"Type": "AWS::S3::BucketPolicy",
 			"Properties": {
-				"RuleSetName": {
-					"Ref": "SESReceiptRuleSet"
+				"Bucket": {
+					"Ref": "S3Email"
 				},
-				"Rule": {
-					"Name": "Inbound",
-					"Actions": [
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
 						{
-							"LambdaAction": {
-								"FunctionArn": {
-									"Fn::GetAtt": [
-										"LambdaEmailInbound",
-										"Arn"
-									]
+							"Sid": "AllowSESPuts",
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "ses.amazonaws.com"
+							},
+							"Action": "s3:PutObject",
+							"Resource": {
+								"Fn::Sub": "arn:aws:s3:::${S3Email}/_inbound/*"
+							},
+							"Condition": {
+								"StringEquals": {
+									"aws:Referer": {
+										"Ref": "AWS::AccountId"
+									}
 								}
 							}
 						}
-					],
-					"Enabled": true
+					]
 				}
-			}
-		},
-		"SESReceiptRuleSet": {
-			"Type": "AWS::SES::ReceiptRuleSet",
-			"Properties": {
-				"RuleSetName": "Default"
 			}
 		},
 		"LambdaEmailConverter": {
@@ -246,6 +285,27 @@
 				"Principal": "s3.amazonaws.com"
 			}
 		},
+		"LambdaEmailOutboundRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "0x4447_s3_email_lambda_outbound",
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "lambda.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				},
+				"ManagedPolicyArns": [
+					"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+				]
+			}
+		},
 		"LambdaEmailOutboundPolicy": {
 			"Type": "AWS::IAM::Policy",
 			"Properties": {
@@ -272,27 +332,6 @@
 						}
 					]
 				}
-			}
-		},
-		"LambdaEmailOutboundRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_lambda_outbound",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "lambda.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				},
-				"ManagedPolicyArns": [
-					"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-				]
 			}
 		},
 		"LambdaEmailSend": {
@@ -676,7 +715,14 @@
 					]
 				},
 				"Runtime": "nodejs8.10",
-				"Timeout": 60
+				"Timeout": 60,
+				"Environment": {
+					"Variables": {
+						"BUCKET": {
+							"Ref": "EmailRestingPlace"
+						}
+					}
+				}
 			}
 		},
 		"S3InboundPermission": {
@@ -846,6 +892,24 @@
 				}
 			}
 		},
+		"CodeBuildDeployRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "0x4447_s3_email_codebuild_deploy",
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "codebuild.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				}
+			}
+		},
 		"CodeBuildDeploy": {
 			"Type": "AWS::CodeBuild::Project",
 			"Properties": {
@@ -885,19 +949,47 @@
 				}
 			}
 		},
-		"CodeBuildDeployRole": {
-			"Type": "AWS::IAM::Role",
+		"CodeBuildDeployPolicyLambdaUpdate": {
+			"Type": "AWS::IAM::Policy",
 			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_deploy",
-				"AssumeRolePolicyDocument": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildDeployRole"
+					}
+				],
+				"PolicyName": "update_lambda_code",
+				"PolicyDocument": {
 					"Version": "2012-10-17",
 					"Statement": [
 						{
 							"Effect": "Allow",
-							"Principal": {
-								"Service": "codebuild.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
+							"Action": "lambda:UpdateFunctionCode",
+							"Resource": {
+								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailInbound}"
+							}
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildDeployPolicyS3": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildDeployRole"
+					}
+				],
+				"PolicyName": "s3_access",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "s3:*",
+							"Resource": {
+								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
+							}
 						}
 					]
 				}
@@ -930,52 +1022,6 @@
 									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound_deploy:*"
 								}
 							]
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildDeployRole"
-					}
-				],
-				"PolicyName": "s3_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployPolicyLambdaUpdate": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildDeployRole"
-					}
-				],
-				"PolicyName": "update_lambda_code",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "lambda:UpdateFunctionCode",
-							"Resource": {
-								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailInbound}"
-							}
 						}
 					]
 				}
