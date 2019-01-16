@@ -5,11 +5,19 @@
 			"RuleSetName": { "Ref": "SESReceiptRuleSet"},
 			"Rule": {
 				"Name": "Inbound",
-				"Actions": [{
-					"LambdaAction": {
-						"FunctionArn": { "Fn::GetAtt": ["LambdaEmailInbound", "Arn"]}
+				"Actions": [
+					{
+						"LambdaAction": {
+							"FunctionArn": { "Fn::GetAtt": ["LambdaEmailInbound", "Arn"]}
+						}
+					},
+					{
+						"S3Action": {
+							"BucketName": { "Ref": "S3Email" },
+							"ObjectKeyPrefix": "_inbound"
+						}
 					}
-				}],
+				],
 				"Enabled": true
 			}
 		}
