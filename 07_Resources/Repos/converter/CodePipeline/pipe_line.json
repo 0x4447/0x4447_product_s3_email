@@ -24,7 +24,7 @@
 							"Configuration": {
 								"Owner": "0x4447",
 								"Repo": "0x4447-product-s3-email-lambda-converter",
-								"Branch": "master",
+								"Branch": { "Ref": "Stage" },
 								"PollForSourceChanges": true,
 								"OAuthToken": { "Ref": "GitHubToken" }
 							},
