@@ -1,8 +1,16 @@
 # 0x4447-Product-S3-Email
 
-This stack is for those that want a free way to receive and send emails for their custom domains. Ideal when it is not worth paying a on-line service to have an email that you are going to use sporadically, and could care less about all the features that comes with that payed service. Also, ideal for developer to have test emails.
+This stack is for those that want a free way to receive and send emails for their custom domains. Ideal when it is not worth paying a on-line service to have an email that you are going to use sporadically, could care less about all the added features. Ideal for:
+
+- individuals that have some technical skills,
+- developer to have test emails,
+- or organizations that want to give emails to thousands of employees at scale (they need to build their own UI).
 
 > Just receive and send email with some skills.
+
+# DISCLAIMER!
+
+This stack is available to anyone at no cost, but on an as-is basis. 0x4447 LLC is not responsible for damages or costs of any kind that may occur when this stack is used. You take full responsibility when you use it.
 
 # How to deploy
 
@@ -10,7 +18,11 @@ Click on this button.
 
 # Manual work
 
-When you deploy this stack not everything is going be done for you. One missing aspect is adding your domain that you want to receive your email to SES, and confirm that you own it. This is due to CloudFomariont not supporting 100% of what AWS has to offer. To add your domain do the following:
+When you deploy this stack not everything is going be done for you.
+
+### Confirm you own the domain
+
+To add your domain do the following:
 
 1. Go to the SES Dashboard.
 1. On the left side menu click `Domains`.
@@ -21,6 +33,17 @@ When you deploy this stack not everything is going be done for you. One missing 
 
 After the domain is confirmed you will be able to send emails from any email address within your domain.
 
+### Enable SES Rule Sets
+
+The deployment will create a SES rules set which should be enabled by default, but because of a know bug in CloudFormation, this dose not always happen. To enable the rule, do the following:
+
+1. Go to the SES Dashboard.
+1. On the left side menu click `Rule Sets`.
+1. From the `Inactive Rule Sets` section check the `0x4447_S3_Email`
+1. Then hit `Set as Active Rule Set`
+
+Once this is done, you will be able to process incoming emails.
+
 # What will be deployed
 
 ![S3-Email Diagram](https://raw.githubusercontent.com/0x4447/0x4447-product-s3-email/assets/diagram.png)
@@ -28,28 +51,27 @@ After the domain is confirmed you will be able to send emails from any email add
 This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger system to tie everything together.
 
 - **SES**: is responsible for receiving and sending emails.
-- **S3 Bucket**: is used to store the messages.
-- **Lambda**: is used to process the emails.
+- **S3 Bucket**: is used to store the messages, and to trigger Lambdas.
+- **Lambdas**: to process the emails.
 
 # How dose it work
 
 **Receiving an email**:
 
 1. An email comes to SES which will trigger a Lambda function.
-1. Tis lambda function will sort the email based on the To and From field and store it in S3 under the `Inbox` folder.
-1. The `Inbox` folder will trigger a Lambda function which will load the raw email, convert it in to a `.html` and `.txt` file. Store it along side the original message.
+1. This lambda function will sort the email based on the To and From field and store it in S3 under the `Inbox` folder.
+1. The `Inbox` folder will trigger a Lambda function which will load the raw email, convert it in to a `.html` and `.txt` file, and store it along side the original message.
 
 **Sending an email**:
 
 1. You create a JSON file properly formatted (check the section bellow)
-1. Save the file in the following path `TMP/email_out/json`
-1. This action will trigger the `json_to_raw` Lambda which will generate a raw email, send out using SES and saving the raw message to `TMP/email_out/raw`
-1. This will trigger the `copy` Lambda, which will copy the raw message to the `Sent` folder organized by the To and From field.
-1. Which will trigger the the same `converter` Lambda used in the **Receiving an email** section to convert the raw message in readable files.
+1. Save the file in the following path `TMP/email_out/json`. The file name or extension are irrelevant as long as the content is text and JSON formated.
+1. This action will trigger the `outbound` Lambda which will generate a raw email, send it out using SES and save the raw message to the `Sent` folder.
+1. The `Sent` folder will trigger a Lambda function which will load the raw email, convert it in to a `.html` and `.txt` file, and store it along side the original message.
 
-This flow was designed to take only advantage of the S3 trigger system, and brake each action in to small Lambdas. One limiting factor of the trigger system is that a PUT action is indistinguishable from each other. Which can causes infitnie loops if. To mitigate this you either have to wrtie extra code to check which object triggered a Lambda, and from where. Or you can differentiate an action by doing a COPY action. This ads an extra step in the flow, but removes the need of extra code. Both solutions are valid, and in this case we decided to opt for the PUT/COPY actions and see how this works.
+This flow was designed to take only advantage of the S3 trigger system, and brake each action in to small Lambda.
 
-# How to make the email message
+### How to make the email message
 
 You create a custom JSON file which you then upload to the `TMP/email_out/json` folder, and the file should look like this:
 
@@ -63,14 +85,14 @@ You create a custom JSON file which you then upload to the `TMP/email_out/json` 
 }
 ```
 
-Remember that the `from` field must use the domain that you added to SES, you won't be able to send email from domains that you did not verified.
+Remember that the `from` field must use the domain that you added to SES, you won't be able to send emails from domains that you did not verify.
 
 # SES Limitation
 
-There are to major limitation with SES:
+There are two major limitation with SES:
 
 1. For security reasons AWS by default allows you to send 200 emails per 24 hour period with a rate of 1 email/second. If you think you'll send more then that, you'll have to ask AWS to increase your limit.
-1. By default you can't send emails to unverified addresses. If you want the ability to send out and not only receive, you'll have to reach out to AWS to remove this limitation from your account.
+1. By default you can't send emails to unverified addresses. If you want the ability to send out (not only receive), you'll have to reach out to AWS to remove this limitation from your account.
 
 # Pricing
 
