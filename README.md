@@ -23,6 +23,8 @@ After the domain is confirmed you will be able to send emails from any email add
 
 # What will be deployed
 
+![S3-Email Diagram](https://raw.githubusercontent.com/0x4447/0x4447-product-s3-email/assets/diagram.png)
+
 This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger system to tie everything together.
 
 - **SES**: is responsible for receiving and sending emails.
