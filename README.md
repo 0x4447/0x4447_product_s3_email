@@ -50,9 +50,15 @@ Once this is done, you will be able to process incoming emails.
 
 This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger system to tie everything together.
 
-- **SES**: is responsible for receiving and sending emails.
-- **S3 Bucket**: is used to store the messages, and to trigger Lambdas.
-- **Lambdas**: to process the emails.
+- 1x SES Rule Sets
+- 2x S3 Bucket
+  - 1x for CodePipeline to store artifacts
+  - 1x for the emails
+- 3x CodePipelines
+- 6x CodeBuilds
+- 3x Lambdas
+
+Once deployed the code for the Lambdas will be automatically updated, and the CodePipeline will keep the Lambda code up-to-date since it will push new code every time the selected brunch gets updated.
 
 # How dose it work
 
