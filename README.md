@@ -39,8 +39,8 @@ The deployment will create a SES rules set which should be enabled by default, b
 
 1. Go to the SES Dashboard.
 1. On the left side menu click `Rule Sets`.
-1. From the `Inactive Rule Sets` section check the `0x4447_S3_Email`
-1. Then hit `Set as Active Rule Set`
+1. From the `Inactive Rule Sets` tab check the `0x4447_S3_Email`
+1. Then hit `Set as Active Rule Set` which will activate the rule.
 
 Once this is done, you will be able to process incoming emails.
 
