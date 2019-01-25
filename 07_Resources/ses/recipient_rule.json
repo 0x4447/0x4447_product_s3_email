@@ -5,6 +5,7 @@
 			"RuleSetName": { "Ref": "SESReceiptRuleSet"},
 			"Rule": {
 				"Name": "Inbound",
+				"Enabled": true,
 				"Actions": [
 					{
 						"LambdaAction": {
@@ -14,11 +15,10 @@
 					{
 						"S3Action": {
 							"BucketName": { "Ref": "S3Email" },
-							"ObjectKeyPrefix": "_inbound"
+							"ObjectKeyPrefix": "TMP/email_in"
 						}
 					}
-				],
-				"Enabled": true
+				]
 			}
 		}
 	}

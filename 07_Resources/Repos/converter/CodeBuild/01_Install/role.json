@@ -1,23 +1,20 @@
 {
-	"LambdaEmailSendRole": {
+	"CodeBuildInstallConverterRole": {
 		"Type": "AWS::IAM::Role",
 		"Properties": {
-			"RoleName": "0x4447_s3_email_lambda_send",
+			"RoleName": "0x4447_s3_email_codebuild_converter_install",
 			"AssumeRolePolicyDocument": {
 				"Version": "2012-10-17",
 				"Statement": [
 					{
 						"Effect": "Allow",
 						"Principal": {
-							"Service": "lambda.amazonaws.com"
+							"Service": "codebuild.amazonaws.com"
 						},
 						"Action": "sts:AssumeRole"
 					}
 				]
-			},
-			"ManagedPolicyArns": [
-				"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-			]
+			}
 		}
 	}
 }

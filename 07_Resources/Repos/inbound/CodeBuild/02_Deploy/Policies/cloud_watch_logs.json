@@ -2,9 +2,7 @@
 	"CodeBuildDeployPolicyCWL": {
 		"Type": "AWS::IAM::Policy",
 		"Properties": {
-			"Roles": [
-				{ "Ref": "CodeBuildDeployRole" }
-			],
+			"Roles": [ { "Ref": "CodeBuildDeployInboundRole" } ],
 			"PolicyName": "cloud_watch_log_access",
 			"PolicyDocument": {
 				"Version": "2012-10-17",

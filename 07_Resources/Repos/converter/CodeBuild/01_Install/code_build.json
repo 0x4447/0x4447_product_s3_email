@@ -1,9 +1,9 @@
 	 {
-	"CodeBuildInstallInbound": {
+	"CodeBuildInstallConverter": {
 		"Type": "AWS::CodeBuild::Project",
 		"Properties": {
-			"Name": "0x4447_s3_email_inbound_install",
-			"ServiceRole": { "Fn::GetAtt": ["CodeBuildInstallInboundRole", "Arn"] },
+			"Name": "0x4447_s3_email_converter_install",
+			"ServiceRole": { "Fn::GetAtt": ["CodeBuildInstallConverterRole", "Arn"] },
 			"TimeoutInMinutes": 60,
 			"Source": {
 				"Type": "CODEPIPELINE",

@@ -1,6 +1,7 @@
 {
 	"S3InboundPermission": {
 		"Type": "AWS::Lambda::Permission",
+		"DependsOn": "LambdaEmailInbound",
 		"Properties": {
 			"Action": "lambda:InvokeFunction",
 			"FunctionName": { "Ref": "LambdaEmailInbound" },

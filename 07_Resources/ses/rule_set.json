@@ -2,7 +2,7 @@
 	"SESReceiptRuleSet": {
 		"Type": "AWS::SES::ReceiptRuleSet",
 		"Properties": {
-			"RuleSetName": "Default"
+			"RuleSetName": "0x4447_S3_Email"
 		}
 	}
 }

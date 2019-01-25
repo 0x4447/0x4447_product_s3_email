@@ -13,7 +13,7 @@
 							"Service": "ses.amazonaws.com"
 						},
 						"Action": "s3:PutObject",
-						"Resource": { "Fn::Sub": "arn:aws:s3:::${S3Email}/_inbound/*" },
+						"Resource": { "Fn::Sub": "arn:aws:s3:::${S3Email}/TMP/email_in/*" },
 						"Condition": {
 							"StringEquals": {
 								"aws:Referer": { "Ref": "AWS::AccountId" }

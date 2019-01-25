@@ -1,11 +1,9 @@
 {
-	"LambdaEmailSendPolicy": {
+	"LambdaEmailOutboundPolicySES": {
 		"Type": "AWS::IAM::Policy",
 		"Properties": {
-			"PolicyName": "SESAccess",
-			"Roles": [
-				{ "Ref": "LambdaEmailSendRole" }
-			],
+			"PolicyName": "ses",
+			"Roles": [ { "Ref": "LambdaEmailOutboundRole" } ],
 			"PolicyDocument": {
 				"Version": "2012-10-17",
 				"Statement": [
@@ -13,11 +11,6 @@
 						"Effect": "Allow",
 						"Action": "ses:SendRawEmail",
 						"Resource": "*"
-					},
-					{
-						"Effect": "Allow",
-						"Action": "s3:*",
-						"Resource": { "Fn::Sub": "arn:aws:s3:::${S3Email}" }
 					}
 				]
 			}
