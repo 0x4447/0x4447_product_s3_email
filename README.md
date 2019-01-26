@@ -58,7 +58,9 @@ This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger sy
 - 6x CodeBuilds
 - 3x Lambdas
 
-Once deployed the code for the Lambdas will be automatically updated, and the CodePipeline will keep the Lambda code up-to-date since it will push new code every time the selected brunch gets updated.
+Once deployed the code for the Lambdas will be automatically updated, and the CodePipeline will keep the Lambda code up-to-date since it will push new code every time the selected brunch gets new code.
+
+All the resources of the project can be found [here](https://github.com/0x4447?utf8=%E2%9C%93&q=0x4447-product-s3-email).
 
 # How dose it work
 
