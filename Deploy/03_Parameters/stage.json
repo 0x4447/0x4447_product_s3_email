@@ -1,0 +1,9 @@
+{
+	"Stage": {
+		"Description": "Select what Stage are you deploying.",
+		"Type": "String",
+		"AllowedValues": ["master", "staging", "development"],
+		"Default": "master",
+		"ConstraintDescription": "must only contain lowercase letters and numbers, and can't start with a number."
+	}
+}

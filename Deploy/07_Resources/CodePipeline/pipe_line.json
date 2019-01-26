@@ -1,0 +1,65 @@
+{
+	"PipelineAutoDeploy": {
+		"Type": "AWS::CodePipeline::Pipeline",
+		"Properties": {
+			"Name": { "Ref": "CPName" },
+			"ArtifactStore": {
+				"Location": { "Ref": "CodePipelineArtifact" },
+				"Type": "S3"
+			},
+			"RoleArn": { "Fn::GetAtt": ["PipelineAutoDeployRole", "Arn"] },
+			"Stages": [
+				{
+					"Name": "Get",
+					"Actions": [
+						{
+							"Name": "Source",
+							"RunOrder": 1,
+							"ActionTypeId": {
+								"Category": "Source",
+								"Owner": "ThirdParty",
+								"Provider": "GitHub",
+								"Version": "1"
+							},
+							"Configuration": {
+								"Owner": { "Ref": "GitHubOwner" },
+								"Repo": { "Ref": "GitHubRepoName" },
+								"Branch": { "Ref": "Stage" },
+								"PollForSourceChanges": true,
+								"OAuthToken": { "Ref": "GitHubToken" }
+							},
+							"OutputArtifacts": [
+								{
+									"Name": "source_code"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Name": "Casting",
+					"Actions": [
+						{
+							"Name": "Mold",
+							"RunOrder": 1,
+							"InputArtifacts": [
+								{
+									"Name": "source_code"
+								}
+							],
+							"Configuration": {
+								"ProjectName": { "Ref": "CodeBuildCasting" }
+							},
+							"ActionTypeId": {
+								"Category": "Build",
+								"Owner": "AWS",
+								"Provider": "CodeBuild",
+								"Version": "1"
+							}
+						}
+					]
+				}
+			]
+		}
+	}
+}

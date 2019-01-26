@@ -1,0 +1,24 @@
+{
+	"CodeBuildDeployRoleS3": {
+		"Type": "AWS::IAM::Policy",
+		"Properties": {
+			"Roles": [ { "Ref": "CodeBuildCastingRole" } ],
+			"PolicyName": "s3_access",
+			"PolicyDocument": {
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Effect": "Allow",
+						"Action": "s3:*",
+						"Resource": { "Fn::Sub": "arn:aws:s3:::${CodePipelineArtifact}/*"}
+					},
+					{
+						"Effect": "Allow",
+						"Action": "s3:*",
+						"Resource": { "Fn::Sub": "arn:aws:s3:::0x4447-test-drive/*"}
+					}
+				]
+			}
+		}
+	}
+}

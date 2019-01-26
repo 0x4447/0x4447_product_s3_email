@@ -1,0 +1,22 @@
+ {
+	"CodeBuildCasting": {
+		"Type": "AWS::CodeBuild::Project",
+		"Properties": {
+			"Name": { "Fn::Sub": "${CPName}_casting" },
+			"ServiceRole": { "Fn::GetAtt": ["CodeBuildCastingRole", "Arn"] },
+			"TimeoutInMinutes": 60,
+			"Source": {
+				"Type": "CODEPIPELINE",
+				"BuildSpec": "buildspec.yml"
+			},
+			"Artifacts": {
+				"Type": "CODEPIPELINE"
+			},
+			"Environment": {
+				"Type": "LINUX_CONTAINER",
+				"ComputeType": "BUILD_GENERAL1_SMALL",
+				"Image": "aws/codebuild/nodejs:8.11.0"
+			}
+		}
+	}
+}

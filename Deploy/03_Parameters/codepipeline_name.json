@@ -1,0 +1,6 @@
+{
+	"CPName": {
+		"Description": "Give your CodeBuild a unique name.",
+		"Type": "String"
+	}
+}

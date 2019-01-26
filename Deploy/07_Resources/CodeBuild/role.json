@@ -1,0 +1,20 @@
+{
+	"CodeBuildCastingRole": {
+		"Type": "AWS::IAM::Role",
+		"Properties": {
+			"RoleName": { "Fn::Sub": "${CPName}_casting" },
+			"AssumeRolePolicyDocument": {
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Effect": "Allow",
+						"Principal": {
+							"Service": "codebuild.amazonaws.com"
+						},
+						"Action": "sts:AssumeRole"
+					}
+				]
+			}
+		}
+	}
+}

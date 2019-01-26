@@ -1,0 +1,22 @@
+{
+	"PipelineConverterPolicyCodeBuild": {
+		"Type": "AWS::IAM::Policy",
+		"Properties": {
+			"PolicyName": "code_build",
+			"Roles": [ { "Ref": "PipelineAutoDeployRole" } ],
+			"PolicyDocument": {
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Action": [
+							"codebuild:BatchGetBuilds",
+							"codebuild:StartBuild"
+						],
+						"Resource": "*",
+						"Effect": "Allow"
+					}
+				]
+			}
+		}
+	}
+}
