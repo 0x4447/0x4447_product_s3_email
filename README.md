@@ -107,8 +107,10 @@ All the resources deployed with this stack will potentially cost you money. But 
 - Invoke your lambdas over 1,000,000 times a month.
 - Send and receive over 1000 emails a month.
 - Perform over 10000 Get and Put operations, and over 2000 Delete ones in your S3 Bucket.
+- Exceed 100 build minutes on CodeBuild
+- $1 per active CodePipeline. A CodePipeline needs to run at least once a month to be considered active.
 
-The only payment that you'll encounter from day one, is S3 storage for the emails that you receive and create.
+The only payment that you'll encounter from day one, is S3 storage for the emails and CodePipeline artifacts.
 
 # How to work with this project
 
