@@ -1,9 +1,9 @@
 {
-	"CodeBuildDeployRoleS3": {
+	"CodeBuildDeployRoleS3Artifact": {
 		"Type": "AWS::IAM::Policy",
 		"Properties": {
 			"Roles": [ { "Ref": "CodeBuildCastingRole" } ],
-			"PolicyName": "s3_access",
+			"PolicyName": "s3_artifact",
 			"PolicyDocument": {
 				"Version": "2012-10-17",
 				"Statement": [
