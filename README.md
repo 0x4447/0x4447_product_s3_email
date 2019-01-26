@@ -1,10 +1,20 @@
 # 0x4447-Product-S3-Email
 
-This stack is for those that want a free way to receive and send emails for their custom domains. Ideal when it is not worth paying a on-line service to have an email that you are going to use sporadically, could care less about all the added features. Ideal for:
+This stack is for those that want a free way to receive and send emails for their custom domains with the additional benefit of being able to organize the incoming emails with a simple `+` character. This stack is deal for:
 
 - individuals that have some technical skills,
-- test emails for developer,
-- or organizations that want to give emails to thousands of employees at scale (they need to build their own UI).
+- developers that need test emails.
+- or organizations that want to give emails to thousands of employees at scale (you'll need to build your own UI).
+
+In addition, this solution will help you organize your emails in a way never seen before thanks to this two features:
+
+### Organizing with a +
+
+You can organize your emails with the `+` character. For example: when you sign up for on-line services you could write the following email: social+facebook@example.com, or social+instagram@example.com, or social+linkedin@example.com. By doing so all your social emails will be grouped in the `social` folder. The possibilities are endless.
+
+### Endless email addresses.
+
+Once you add and confirm your domain with SES you can put in front of the `@` any sting you want (that conform with the email address standard). This means you have endless email addresses to organize your life however you want. And on top of that, with the `+` character you'll never need to crated tedious filters to organize your emails or pay unnecessary money for something so basic like an inbox.
 
 > Just receive and send email with some skills.
 
