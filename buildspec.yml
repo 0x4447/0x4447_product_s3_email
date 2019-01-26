@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm install -g @0x4447/grapes@1.0.2
+  build:
+    commands:
+      - grapes -b -s .
+  post_build:
+    finally:
+      - aws s3 cp CloudFormation.json s3://0x4447.com-foundry/cloudformation/s3-email.json
