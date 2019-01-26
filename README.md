@@ -12,7 +12,7 @@ In addition, this solution will help you organize your emails in a way never see
 
 You can organize your emails with the `+` character. For example: when you sign up for on-line services you could write the following email: social+facebook@example.com, or social+instagram@example.com, or social+linkedin@example.com. By doing so all your social emails will be grouped in the `social` folder. The possibilities are endless.
 
-### Endless email addresses.
+### Endless email addresses
 
 Once you add and confirm your domain with SES you can put in front of the `@` any sting you want (that conform with the email address standard). This means you have endless email addresses to organize your life however you want. And on top of that, with the `+` character you'll never need to crated tedious filters to organize your emails or pay unnecessary money for something so basic like an inbox.
 
