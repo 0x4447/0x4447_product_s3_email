@@ -9,4 +9,4 @@ phases:
       - grapes -b -s ./Stack
   post_build:
     finally:
-      - aws s3 cp ./stack/CloudFormation.json s3://0x4447-test-drive/cloudformation/s3-email.json
+      - aws s3 cp ./Stack/CloudFormation.json s3://0x4447-test-drive/cloudformation/s3-email.json
