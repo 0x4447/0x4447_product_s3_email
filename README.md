@@ -26,6 +26,24 @@ This stack is available to anyone at no cost, but on an as-is basis. 0x4447 LLC 
 
 Click on this button.
 
+# What will be deployed
+
+![S3-Email Diagram](https://raw.githubusercontent.com/0x4447/0x4447-product-s3-email/assets/diagram.png)
+
+This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger system to tie everything together.
+
+- 1x SES Rule Sets
+- 2x S3 Bucket
+  - 1x for CodePipeline to store artifacts
+  - 1x for the emails
+- 3x CodePipelines
+- 6x CodeBuilds
+- 3x Lambdas
+
+Once deployed the code for the Lambdas will be automatically updated, and the CodePipeline will keep the Lambda code up-to-date since it will push new code every time the selected brunch gets new code.
+
+All the resources of the project can be found [here](https://github.com/0x4447?utf8=%E2%9C%93&q=0x4447-product-s3-email).
+
 # Manual work
 
 When you deploy this stack not everything is going be done for you.
@@ -53,24 +71,6 @@ The deployment will create a SES rules set which should be enabled by default, b
 1. Then hit `Set as Active Rule Set` which will activate the rule.
 
 Once this is done, you will be able to process incoming emails.
-
-# What will be deployed
-
-![S3-Email Diagram](https://raw.githubusercontent.com/0x4447/0x4447-product-s3-email/assets/diagram.png)
-
-This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger system to tie everything together.
-
-- 1x SES Rule Sets
-- 2x S3 Bucket
-  - 1x for CodePipeline to store artifacts
-  - 1x for the emails
-- 3x CodePipelines
-- 6x CodeBuilds
-- 3x Lambdas
-
-Once deployed the code for the Lambdas will be automatically updated, and the CodePipeline will keep the Lambda code up-to-date since it will push new code every time the selected brunch gets new code.
-
-All the resources of the project can be found [here](https://github.com/0x4447?utf8=%E2%9C%93&q=0x4447-product-s3-email).
 
 # How dose it work
 
