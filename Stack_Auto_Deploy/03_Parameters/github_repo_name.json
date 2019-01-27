@@ -1,6 +1,6 @@
 {
 	"GitHubRepoName": {
-		"Description": "Past the URL to the repo that you want to monitor.",
+		"Description": "Write the repository name, as it's seen on GitHub.",
 		"Type": "String"
 	}
 }

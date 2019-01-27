@@ -1,6 +1,6 @@
 {
 	"GitHubOwner": {
-		"Description": "Past the URL to the repo that you want to monitor.",
+		"Description": "Write the name of the owner of the repository. Either the Org name or the user name.",
 		"Type": "String"
 	}
 }

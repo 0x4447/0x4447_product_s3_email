@@ -1,6 +1,6 @@
 {
 	"CPName": {
-		"Description": "Give your CodeBuild a unique name.",
+		"Description": "Give the CodePipeline a unique name.",
 		"Type": "String"
 	}
 }
