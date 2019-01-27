@@ -9,4 +9,4 @@ phases:
       - grapes -b -s ./Stack_S3_Email
   post_build:
     finally:
-      - aws s3 cp ./Stack_S3_Email/CloudFormation.json s3://0x4447-drive-cloudformation/s3-email.json --acl public-read --acl bucket-owner-full-control
+      - aws s3 cp ./Stack_S3_Email/CloudFormation.json s3://0x4447-drive-cloudformation/s3-email.json --acl public-read
