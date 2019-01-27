@@ -138,7 +138,7 @@ The only payment that you'll encounter from day one, is S3 storage for the email
 
 # How to work with this project
 
-If you'd like to change some aspects of this stack, don't edit the `CloudFormation.json` file. We recommend you use the [Grapes framework](https://github.com/0x4447/0x4447-cli-node-grapes). This tool was designed to make it easier to work with Cloud Formation file. You should never edit the main CF file.
+When you want to deploy the stack, the only file you should be interested in is the `CloudFormation.json` file. If you'd like to modify the stack, we recommend that you use the [Grapes framework](https://github.com/0x4447/0x4447-cli-node-grapes), which was designed to make it easier to work with the CloudFormation file. You should never edit the main CF file if you want to keep your sanity 🤪.
 
 # The End
 
