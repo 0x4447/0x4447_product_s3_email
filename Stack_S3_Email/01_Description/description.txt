@@ -1,0 +1,1 @@
+This stack will create a solution where you get infinite emails using AWS SES and S3.
