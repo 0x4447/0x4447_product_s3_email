@@ -1,20 +1,28 @@
 # 0x4447-Product-S3-Email
 
-This stack is for those that want a free way to receive and send emails for their custom domains with the additional benefit of being able to organize the incoming emails with a simple `+` character. This stack is deal for:
+This stack was created out of frustration, where till this day there is no easy way to have a full email server without the overhead of installing and configuring all the servers needed to handle the incoming and outgoing messages. We wanted something simple, no interface and no server management, and thus we came up with S3-Email.
 
-- individuals that have some technical skills,
-- developers that need test emails.
-- or organizations that want to give emails to thousands of employees at scale (you'll need to build your own UI).
+Where we use AWS SES as our email server (receive and send) while using S3 as our database and interface. With a bit of code to tie everything together using AWS Lambda.
 
-In addition, this solution will help you organize your emails in a way never seen before thanks to this two features:
+The result is an unmanaged email server with unlimited email address, and the benefit of easily organizing the messages by using the `+` character in the email names. Since the `+` will be converted in to a `/` which correlates to an object path in S3.
 
 ### Organizing with a +
 
-You can organize your emails with the `+` character. For example: when you sign up for on-line services you could write the following email: social+facebook@example.com, or social+instagram@example.com, or social+linkedin@example.com. By doing so all your social emails will be grouped in the `social` folder. The possibilities are endless.
+You can organize your emails with the `+` character. For example: when you sign up for on-line services you could write the following email:
+
+- social+facebook@example.com, or
+- social+instagram@example.com, or
+- social+linkedin@example.com.
+
+By doing so all your social emails will be grouped in the `social` folder. The possibilities are endless.
 
 ### Endless email addresses
 
-Once you add and confirm your domain with SES you can put in front of the `@` any sting you want (that conform with the email address standard). This means you have endless email addresses to organize your life however you want. And on top of that, with the `+` character you'll never need to crated tedious filters to organize your emails or pay unnecessary money for something so basic like an inbox.
+But since once you add and confirm your domain with SES you can put in front of the `@` any sting you want (that conform with the email address standard). This means you have endless email addresses to organize your life however you want. For example each service you sing-up for can have their one special email like:
+
+- facebook@example.com, or
+- instagram@example.com, or
+- linkedin@example.com.
 
 > Just receive and send email with some skills.
 
@@ -33,7 +41,7 @@ To deploy this stack just click the button to the left, and follow the instructi
 
 ![S3-Email Diagram](https://raw.githubusercontent.com/0x4447/0x4447-product-s3-email/assets/diagram.png)
 
-This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger system to tie everything together.
+This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger system to tie everything together. You'll get:
 
 - 1x SES Rule Sets
 - 2x S3 Bucket
@@ -43,17 +51,22 @@ This stack takes advantage of AWS S3, AWS SES, AWS Lambda and the AWS Trigger sy
 - 6x CodeBuilds
 - 3x Lambdas
 
-Once deployed the code for the Lambdas will be automatically updated, and the CodePipeline will keep the Lambda code up-to-date since it will push new code every time the selected brunch gets new code.
-
 All the resources of the project can be found [here](https://github.com/0x4447?utf8=%E2%9C%93&q=0x4447-product-s3-email).
+
+# Auto deploy
+
+The stack is set up in a way where airy time there is new code pushed to a selected branch the CodePipeline will pick up the change and update the Lambda for you. This are the available branches:
+
+- **master**: the latest stable code
+- **development**: unstable code that we test in our test environment. We don't recommend you use this branch.
 
 # Manual work
 
-When you deploy this stack not everything is going be done for you.
+When you deploy this stack not everything is going to work out of the box.
 
 ### Confirm you own the domain
 
-To add your domain do the following:
+You have to add your domain and confirm you own it. To do so, do the following:
 
 1. Go to the SES Dashboard.
 1. On the left side menu click `Domains`.
@@ -62,39 +75,42 @@ To add your domain do the following:
 1. In the next window you will have all the information needed to configure your domain.
 1. Once done you have to wait some time for the domain to switch from a status of `pending verification` to `verified`.
 
-After the domain is confirmed you will be able to send emails from any email address within your domain.
-
 ### Enable SES Rule Sets
 
-The deployment will create a SES rules set which should be enabled by default, but because of a know bug in CloudFormation, this dose not always happen. To enable the rule, do the following:
+The deployment will create a SES `rules set` which should be enabled by default, but because of a know bug in CloudFormation itself, this dose not always happen. To enable the rule, do the following:
 
 1. Go to the SES Dashboard.
 1. On the left side menu click `Rule Sets`.
 1. From the `Inactive Rule Sets` tab check the `0x4447_S3_Email`
 1. Then hit `Set as Active Rule Set` which will activate the rule.
 
-Once this is done, you will be able to process incoming emails.
+# SES Limitation
 
-# How dose it work
+There are two major limitation with SES:
+
+1. For security reasons AWS by default allows you to send 200 emails per 24 hour period with a rate of 1 email/second. If you think you'll send more than that, you'll have to ask AWS to increase your limit.
+1. By default you can't send emails to unverified addresses. If you want the ability to send out (not only receive), you'll have to reach out to AWS to remove this limitation from your account.
+
+# How dose the stack work
 
 **Receiving an email**:
 
 1. An email comes to SES which will trigger a Lambda function.
-1. This lambda function will sort the email based on the To and From field and store it in S3 under the `Inbox` folder.
+1. This lambda function will sort the email based on the `To` and `From` field and store it in S3 under the `Inbox` folder.
 1. The `Inbox` folder will trigger a Lambda function which will load the raw email, convert it in to a `.html` and `.txt` file, and store it along side the original message.
 
 **Sending an email**:
 
 1. You create a JSON file properly formatted (check the section bellow)
-1. Save the file in the following path `TMP/email_out/json`. The file name or extension are irrelevant as long as the content is text and JSON formated.
-1. This action will trigger the `outbound` Lambda which will generate a raw email, send it out using SES and save the raw message to the `Sent` folder.
+1. Save the file in the following path `TMP/email_out/json`. The file name or extension are irrelevant as long as the content is text and JSON formatted.
+1. This action will trigger the a Lambda which will generate a raw email, send it out using SES and save the raw message to the `Sent` folder.
 1. The `Sent` folder will trigger a Lambda function which will load the raw email, convert it in to a `.html` and `.txt` file, and store it along side the original message.
 
 This flow was designed to take only advantage of the S3 trigger system, and brake each action in to small Lambda.
 
 ### How to make the email message
 
-You create a custom JSON file which you then upload to the `TMP/email_out/json` folder, and the file should look like this:
+You create a custom JSON file which you then upload to the `TMP/email_out/json` folder (if you don't have the folder structure – make it). The JSON structure should look like this:
 
 ```
 {
@@ -107,13 +123,6 @@ You create a custom JSON file which you then upload to the `TMP/email_out/json` 
 ```
 
 Remember that the `from` field must use the domain that you added to SES, you won't be able to send emails from domains that you did not verify.
-
-# SES Limitation
-
-There are two major limitation with SES:
-
-1. For security reasons AWS by default allows you to send 200 emails per 24 hour period with a rate of 1 email/second. If you think you'll send more then that, you'll have to ask AWS to increase your limit.
-1. By default you can't send emails to unverified addresses. If you want the ability to send out (not only receive), you'll have to reach out to AWS to remove this limitation from your account.
 
 # Pricing
 
