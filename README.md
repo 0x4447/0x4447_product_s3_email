@@ -2,21 +2,21 @@
 
 This stack was created out of frustration due to the fact that to this day there's no easy way to have a full email server without the overhead of installing and configuring all servers needed to handle incoming and outgoing messages. We wanted something simple, with no interface and no server management, so we came up with S3-Email. This included AWS SES as our email server (receive and send) and S3 as our database and interface. Then we tied everything together with a bit of code via AWS Lambda.
 
-The result is an unmanaged email server with unlimited email addresses that also offers the benefit of easily organizing messages by adding the "+" character to the email names. The "+" is converted to a "/", which correlates to an object path in S3.
+The result is an unmanaged email server with unlimited email addresses that also offers the benefit of easily organizing messages by adding the `+` character to the email names. The `+` is converted to a `/`, which correlates to an object path in S3.
 
 ### Organizing with a +
 
-When you sign up for online services, organize your emails with the "+" character in this way:
+When you sign up for online services, organize your emails with the `+` character in this way:
 
 - social+facebook@example.com
 - social+instagram@example.com
 - social+linkedin@example.com
 
-This groups all social emails in the "Social" folder. The possibilities are endless.
+This groups all social emails in the `Social` folder. The possibilities are endless.
 
 ### Endless email addresses
 
-Once you add and confirm your domain with SES, you can put any string you want in front of the "@", as long as it conforms to the email address standard. This means that you'll have endless email addresses at your disposal, and you'll be able to organize your life in any way you want. For example, you can give each service you sign up for its own special email:
+Once you add and confirm your domain with SES, you can put any string you want in front of the `@`, as long as it conforms to the email address standard. This means that you'll have endless email addresses at your disposal, and you'll be able to organize your life in any way you want. For example, you can give each service you sign up for its own special email:
 
 - facebook@example.com
 - instagram@example.com
@@ -30,8 +30,8 @@ This stack is available to anyone at no cost, but on an as-is basis. 0x4447 LLC 
 
 # How to deploy
 
-<a target="_blank" href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=zer0x4447-S3-Email&templateURL=https://s3.amazonaws.com/0x4447-drive-cloudformation/s3-email.json">
-<img align="left" style="float: left; margin: 0 10px 0 0;" src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"></a>
+<a target=`_blank` href=`https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=zer0x4447-S3-Email&templateURL=https://s3.amazonaws.com/0x4447-drive-cloudformation/s3-email.json`>
+<img align=`left` style=`float: left; margin: 0 10px 0 0;` src=`https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png`></a>
 
 All you need to do to deploy this stack is click the button the left and follow the instructions that CloudFormation provides in your AWS Dashboard.
 
@@ -67,20 +67,20 @@ Keep in mind that when you deploy, everything may not work right out of the box.
 You have to add your domain and confirm that you own it. Follow these steps to do so:
 
 1. Go to the SES Dashboard.
-2. Click "Domains" on the left side menu.
-3. Click the blue "Verify a New Domain" button.
-4. Type your domain in the modal and select "Generate DKIM Settings".
+2. Click `Domains` on the left side menu.
+3. Click the blue `Verify a New Domain` button.
+4. Type your domain in the modal and select `Generate DKIM Settings`.
 5. The next window displays all information needed to configure your domain.
-6. Once finisheds, you'll wait some time for the domain to switch from a "pending verification" status to a "verified" status.
+6. Once finisheds, you'll wait some time for the domain to switch from a `pending verification` status to a `verified` status.
 
 ### Enable SES Rule Sets
 
-Deployment creates SES "rule sets". This should be enabled by default, but it doesn't always happen because of a known bug in CloudFormation. Taking the following steps will enable the rule:
+Deployment creates SES `rule sets`. This should be enabled by default, but it doesn't always happen because of a known bug in CloudFormation. Taking the following steps will enable the rule:
 
 1. Go to the SES Dashboard.
-2. Click "Rule Sets" on the left side menu.
-3. Check "0x4447_S3_Email" on the "Inactive Rule Sets" tab.
-4. Hit "Set as Active Rule Set" to activate the rule.
+2. Click `Rule Sets` on the left side menu.
+3. Check `0x4447_S3_Email` on the `Inactive Rule Sets` tab.
+4. Hit `Set as Active Rule Set` to activate the rule.
 
 # SES Limitations
 
@@ -94,33 +94,33 @@ There are two major limitations with SES:
 **Receiving email**:
 
 1. An email comes to SES and triggers a Lambda function.
-2. The Lambda function sorts the email based on the "To" and "From" fields and stores it in the `Inbox` folder under S3.
-3. The "Inbox" folder triggers another Lambda function that loads the raw email, converts it to a ".html" and ".txt" file, and stores it alongside the original message.
+2. The Lambda function sorts the email based on the `To` and `From` fields and stores it in the `Inbox` folder under S3.
+3. The `Inbox` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
 
 **Sending email**:
 
 1. Create a properly formatted JSON file (see the following section).
-2. Save the file to the path "TMP/email_out/json". The file name and extension are irrelevant as long as the content is text and JSON formatted.
-3. This action triggers a Lambda that generates a raw email, sends it out using SES, and saves the raw message to the "Sent" folder.
-4. The "Sent" folder triggers another Lambda function that loads the raw email, converts it to a ".html" and ".txt" file, and stores it alongside the original message.
+2. Save the file to the path `TMP/email_out/json`. The file name and extension are irrelevant as long as the content is text and JSON formatted.
+3. This action triggers a Lambda that generates a raw email, sends it out using SES, and saves the raw message to the `Sent` folder.
+4. The `Sent` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
 
 This flow was designed to take advantage of the S3 trigger system and break each action into a small Lambda.
 
 ### How to create an email message
 
-Create a custom JSON file, then upload it to the "TMP/email_out/json" folder (if you don't have the folder structure yet, set it up). The JSON structure should look like this:
+Create a custom JSON file, then upload it to the `TMP/email_out/json` folder (if you don't have the folder structure yet, set it up). The JSON structure should look like this:
 
 ```
 {
-	"from": "name@example.com",
-	"to": "name@example.com",
-	"subject": "From SES",
-	"html": "Write a nice message to whoever you are sending this message to.",
-	"text": "Write a nice message to whoever you are sending this message to."
+	`from`: `name@example.com`,
+	`to`: `name@example.com`,
+	`subject`: `From SES`,
+	`html`: `Write a nice message to whoever you are sending this message to.`,
+	`text`: `Write a nice message to whoever you are sending this message to.`
 }
 ```
 
-Remember that the "From" field must contain the domain you added to SES. You won't be able to send emails from unverified domains.
+Remember that the `From` field must contain the domain you added to SES. You won't be able to send emails from unverified domains.
 
 # Pricing
 
@@ -136,7 +136,7 @@ The only payment you'll encounter from Day One is an S3 storage fee for emails a
 
 # How to work with this project
 
-When you want to deploy the stack, the only file you should be interested in is the "CloudFormation.json" file. If you'd like to modify the stack, we recommend that you use the [Grapes framework](https://github.com/0x4447/0x4447-cli-node-grapes), which was designed to make it easier to work with the CloudFormation file. If you'd like to keep your sanity, never edit the main CF file 🤪.
+When you want to deploy the stack, the only file you should be interested in is the `CloudFormation.json` file. If you'd like to modify the stack, we recommend that you use the [Grapes framework](https://github.com/0x4447/0x4447-cli-node-grapes), which was designed to make it easier to work with the CloudFormation file. If you'd like to keep your sanity, never edit the main CF file 🤪.
 
 # The End
 
