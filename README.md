@@ -112,11 +112,11 @@ Create a custom JSON file, then upload it to the `TMP/email_out/json` folder (if
 
 ```
 {
-	`from`: `name@example.com`,
-	`to`: `name@example.com`,
-	`subject`: `From SES`,
-	`html`: `Write a nice message to whoever you are sending this message to.`,
-	`text`: `Write a nice message to whoever you are sending this message to.`
+	"from": "name@example.com",
+	"to": "name@example.com",
+	"subject": "From SES",
+	"html": "Write a nice message to whoever you are sending this message to.",
+	"text": "Write a nice message to whoever you are sending this message to."
 }
 ```
 
