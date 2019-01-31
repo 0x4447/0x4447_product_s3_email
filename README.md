@@ -16,13 +16,13 @@ This groups all social emails in the `Social` folder. The possibilities are endl
 
 ### Endless email addresses
 
-Once you add and confirm your domain with SES, you can put any string you want in front of the `@`, as long as it conforms to the email address standard. This means that you'll have endless email addresses at your disposal, and you'll be able to organize your life in any way you want. For example, you can give each service you sign up for its own special email:
+Once you add and confirm your domain with SES, you can put any string you want in front of the `@`, as long as it conforms to the email address standard. This means that you'll have endless email addresses at your disposal, and you'll be able to organize your life in a way never possible before. For example, you can give each service you sign up for its own special email:
 
 - facebook@example.com
 - instagram@example.com
 - linkedin@example.com
 
-This allows you to use some skill in receiving and sending email messages.
+> Recive and send email with some skills.
 
 # DISCLAIMER!
 
@@ -33,7 +33,7 @@ This stack is available to anyone at no cost, but on an as-is basis. 0x4447 LLC 
 <a target="_blank" href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=zer0x4447-S3-Email&templateURL=https://s3.amazonaws.com/0x4447-drive-cloudformation/s3-email.json">
 <img align="left" style="float: left; margin: 0 10px 0 0;" src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"></a>
 
-All you need to do to deploy this stack is click the button the left and follow the instructions that CloudFormation provides in your AWS Dashboard.
+All you need to do to deploy this stack is click the button to the left and follow the instructions that CloudFormation provides in your AWS Dashboard.
 
 # What will deploy?
 
