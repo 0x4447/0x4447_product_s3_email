@@ -1,8 +1,8 @@
 {
-	"CodeBuildOutboundDeployRole": {
+	"CodeBuildConverterRole": {
 		"Type": "AWS::IAM::Role",
 		"Properties": {
-			"RoleName": "0x4447_s3_email_codebuild_outbound_deploy",
+			"RoleName": "0x4447_s3_email_codebuild_converter",
 			"AssumeRolePolicyDocument": {
 				"Version": "2012-10-17",
 				"Statement": [

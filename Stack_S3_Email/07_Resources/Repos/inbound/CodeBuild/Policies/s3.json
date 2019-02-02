@@ -2,7 +2,7 @@
 	"CodeBuildDeployPolicyS3": {
 		"Type": "AWS::IAM::Policy",
 		"Properties": {
-			"Roles": [ { "Ref": "CodeBuildDeployInboundRole" } ],
+			"Roles": [ { "Ref": "CodeBuildInboundRole" } ],
 			"PolicyName": "s3_access",
 			"PolicyDocument": {
 				"Version": "2012-10-17",

@@ -3,12 +3,25 @@
 		"Type": "AWS::S3::Bucket",
 		"DependsOn": [
 			"LambdaEmailOutbound",
-			"LambdaEmailConverter"
+			"LambdaEmailConverter",
+			"LambdaEmailInbound"
 		],
 		"Properties": {
 			"BucketName": { "Fn::Sub": "${EmailRestingPlace}" },
 			"NotificationConfiguration": {
 				"LambdaConfigurations": [
+					{
+						"Function": { "Fn::GetAtt": [ "LambdaEmailInbound", "Arn" ] },
+						"Event": "s3:ObjectCreated:Put",
+						"Filter": {
+							"S3Key": {
+								"Rules": [{
+									"Name": "prefix",
+									"Value": "TMP/email_in"
+								}]
+							}
+						}
+					},
 					{
 						"Function": { "Fn::GetAtt": [ "LambdaEmailOutbound", "Arn" ] },
 						"Event": "s3:ObjectCreated:Put",

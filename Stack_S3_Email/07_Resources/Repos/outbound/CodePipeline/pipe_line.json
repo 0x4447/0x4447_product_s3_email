@@ -13,7 +13,7 @@
 					"Name": "Get",
 					"Actions": [
 						{
-							"Name": "Source",
+							"Name": "Material",
 							"RunOrder": 1,
 							"ActionTypeId": {
 								"Category": "Source",
@@ -37,10 +37,10 @@
 					]
 				},
 				{
-					"Name": "Prepare",
+					"Name": "Cast",
 					"Actions": [
 						{
-							"Name": "Install",
+							"Name": "Mold",
 							"RunOrder": 1,
 							"InputArtifacts": [
 								{
@@ -48,35 +48,7 @@
 								}
 							],
 							"Configuration": {
-								"ProjectName": { "Ref": "CodeBuildOutboundInstall" }
-							},
-							"ActionTypeId": {
-								"Category": "Build",
-								"Owner": "AWS",
-								"Provider": "CodeBuild",
-								"Version": "1"
-							},
-							"OutputArtifacts": [
-								{
-									"Name": "prepared"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Name": "Deploy",
-					"Actions": [
-						{
-							"Name": "Code",
-							"RunOrder": 1,
-							"InputArtifacts": [
-								{
-									"Name": "prepared"
-								}
-							],
-							"Configuration": {
-								"ProjectName": { "Ref": "CodeBuildOutboundDeploy" }
+								"ProjectName": { "Ref": "CodeBuildOutbound" }
 							},
 							"ActionTypeId": {
 								"Category": "Build",

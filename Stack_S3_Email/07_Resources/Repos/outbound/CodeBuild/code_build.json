@@ -1,13 +1,13 @@
  {
-	"CodeBuildOutboundDeploy": {
+	"CodeBuildOutbound": {
 		"Type": "AWS::CodeBuild::Project",
 		"Properties": {
-			"Name": "0x4447_s3_email_outbound_deploy",
-			"ServiceRole": { "Fn::GetAtt": ["CodeBuildOutboundDeployRole", "Arn"] },
+			"Name": "0x4447_s3_email_outbound",
+			"ServiceRole": { "Fn::GetAtt": ["CodeBuildOutboundRole", "Arn"] },
 			"TimeoutInMinutes": 60,
 			"Source": {
 				"Type": "CODEPIPELINE",
-				"BuildSpec": "buildspec-deploy.yml"
+				"BuildSpec": "buildspec.yml"
 			},
 			"Artifacts": {
 				"Type": "CODEPIPELINE"

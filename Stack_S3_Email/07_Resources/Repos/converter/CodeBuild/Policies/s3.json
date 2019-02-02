@@ -1,8 +1,8 @@
 {
-	"CodeBuildOutboundSetupPolicyS3": {
+	"CodeBuildConverterPolicyS3": {
 		"Type": "AWS::IAM::Policy",
 		"Properties": {
-			"Roles": [ { "Ref": "CodeBuildOutboundInstallRole" } ],
+			"Roles": [ { "Ref": "CodeBuildConverterRole" } ],
 			"PolicyName": "s3_access",
 			"PolicyDocument": {
 				"Version": "2012-10-17",

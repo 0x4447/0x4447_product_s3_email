@@ -5,8 +5,7 @@
 		"Properties": {
 			"Action": "lambda:InvokeFunction",
 			"FunctionName": { "Ref": "LambdaEmailInbound" },
-			"Principal": "ses.amazonaws.com",
-			"SourceAccount": { "Ref": "AWS::AccountId" }
+			"Principal": "s3.amazonaws.com"
 		}
 	}
 }
