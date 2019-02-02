@@ -46,7 +46,7 @@ The stack takes advantage of AWS S3, AWS SES, AWS Lambda, and the AWS Trigger sy
   - 1x for CodePipeline to store artifacts
   - 1x for the emails
 - 3x CodePipelines
-- 6x CodeBuilds
+- 3x CodeBuilds
 - 3x Lambdas
 
 All project resources can be found [here](https://github.com/0x4447?utf8=%E2%9C%93&q=0x4447-product-s3-email).
