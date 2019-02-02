@@ -1,13 +1,13 @@
  {
-	"CodeBuildDeployConverter": {
+	"CodeBuildInbound": {
 		"Type": "AWS::CodeBuild::Project",
 		"Properties": {
-			"Name": "0x4447_s3_email_converter_deploy",
-			"ServiceRole": { "Fn::GetAtt": ["CodeBuildDeployConverterRole", "Arn"] },
+			"Name": "0x4447_s3_email_inbound",
+			"ServiceRole": { "Fn::GetAtt": ["CodeBuildInboundRole", "Arn"] },
 			"TimeoutInMinutes": 60,
 			"Source": {
 				"Type": "CODEPIPELINE",
-				"BuildSpec": "buildspec-deploy.yml"
+				"BuildSpec": "buildspec.yml"
 			},
 			"Artifacts": {
 				"Type": "CODEPIPELINE"
@@ -17,7 +17,7 @@
 				"ComputeType": "BUILD_GENERAL1_SMALL",
 				"Image": "aws/codebuild/nodejs:8.11.0",
 				"EnvironmentVariables": [
-					{ "Name": "FUNCTION_NAME", "Type": "PLAINTEXT", "Value": { "Ref": "LambdaEmailConverter" } }
+					{ "Name": "FUNCTION_NAME", "Type": "PLAINTEXT", "Value": { "Ref": "LambdaEmailInbound" } }
 				]
 			}
 		}

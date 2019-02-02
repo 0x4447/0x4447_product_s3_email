@@ -1,6 +1,6 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
-	"Description": "This is a default description made by Grapse.",
+	"Description": "This stack will create a solution where you get infinite emails using AWS SES and S3.",
 	"Parameters": {
 		"EmailRestingPlace": {
 			"Description": "The S3 bucket name where the emails will be stored when they come through AWS SES.",
@@ -37,16 +37,6 @@
 					"Enabled": true,
 					"Actions": [
 						{
-							"LambdaAction": {
-								"FunctionArn": {
-									"Fn::GetAtt": [
-										"LambdaEmailInbound",
-										"Arn"
-									]
-								}
-							}
-						},
-						{
 							"S3Action": {
 								"BucketName": {
 									"Ref": "S3Email"
@@ -64,11 +54,20 @@
 				"RuleSetName": "0x4447_S3_Email"
 			}
 		},
+		"S3Code": {
+			"Type": "AWS::S3::Bucket",
+			"Properties": {
+				"BucketName": {
+					"Fn::Sub": "${CodePipelineBucketName}"
+				}
+			}
+		},
 		"S3Email": {
 			"Type": "AWS::S3::Bucket",
 			"DependsOn": [
 				"LambdaEmailOutbound",
-				"LambdaEmailConverter"
+				"LambdaEmailConverter",
+				"LambdaEmailInbound"
 			],
 			"Properties": {
 				"BucketName": {
@@ -76,6 +75,25 @@
 				},
 				"NotificationConfiguration": {
 					"LambdaConfigurations": [
+						{
+							"Function": {
+								"Fn::GetAtt": [
+									"LambdaEmailInbound",
+									"Arn"
+								]
+							},
+							"Event": "s3:ObjectCreated:Put",
+							"Filter": {
+								"S3Key": {
+									"Rules": [
+										{
+											"Name": "prefix",
+											"Value": "TMP/email_in"
+										}
+									]
+								}
+							}
+						},
 						{
 							"Function": {
 								"Fn::GetAtt": [
@@ -168,14 +186,6 @@
 				}
 			}
 		},
-		"S3Code": {
-			"Type": "AWS::S3::Bucket",
-			"Properties": {
-				"BucketName": {
-					"Fn::Sub": "${CodePipelineBucketName}"
-				}
-			}
-		},
 		"PipelineInbound": {
 			"Type": "AWS::CodePipeline::Pipeline",
 			"Properties": {
@@ -197,7 +207,7 @@
 						"Name": "Get",
 						"Actions": [
 							{
-								"Name": "Source",
+								"Name": "Material",
 								"RunOrder": 1,
 								"ActionTypeId": {
 									"Category": "Source",
@@ -225,10 +235,10 @@
 						]
 					},
 					{
-						"Name": "Prepare",
+						"Name": "Cast",
 						"Actions": [
 							{
-								"Name": "Install",
+								"Name": "Mold",
 								"RunOrder": 1,
 								"InputArtifacts": [
 									{
@@ -237,37 +247,7 @@
 								],
 								"Configuration": {
 									"ProjectName": {
-										"Ref": "CodeBuildInstallInbound"
-									}
-								},
-								"ActionTypeId": {
-									"Category": "Build",
-									"Owner": "AWS",
-									"Provider": "CodeBuild",
-									"Version": "1"
-								},
-								"OutputArtifacts": [
-									{
-										"Name": "prepared"
-									}
-								]
-							}
-						]
-					},
-					{
-						"Name": "Deploy",
-						"Actions": [
-							{
-								"Name": "Code",
-								"RunOrder": 1,
-								"InputArtifacts": [
-									{
-										"Name": "prepared"
-									}
-								],
-								"Configuration": {
-									"ProjectName": {
-										"Ref": "CodeBuildDeployInbound"
+										"Ref": "CodeBuildInbound"
 									}
 								},
 								"ActionTypeId": {
@@ -491,10 +471,7 @@
 				"FunctionName": {
 					"Ref": "LambdaEmailInbound"
 				},
-				"Principal": "ses.amazonaws.com",
-				"SourceAccount": {
-					"Ref": "AWS::AccountId"
-				}
+				"Principal": "s3.amazonaws.com"
 			}
 		},
 		"LambdaEmailInboundRole": {
@@ -546,41 +523,20 @@
 				}
 			}
 		},
-		"LambdaEmailInboundPolicySES": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"PolicyName": "SESAccess",
-				"Roles": [
-					{
-						"Ref": "LambdaEmailInboundRole"
-					}
-				],
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "ses:SendRawEmail",
-							"Resource": "*"
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployInbound": {
+		"CodeBuildInbound": {
 			"Type": "AWS::CodeBuild::Project",
 			"Properties": {
-				"Name": "0x4447_s3_email_inbound_deploy",
+				"Name": "0x4447_s3_email_inbound",
 				"ServiceRole": {
 					"Fn::GetAtt": [
-						"CodeBuildDeployInboundRole",
+						"CodeBuildInboundRole",
 						"Arn"
 					]
 				},
 				"TimeoutInMinutes": 60,
 				"Source": {
 					"Type": "CODEPIPELINE",
-					"BuildSpec": "buildspec-deploy.yml"
+					"BuildSpec": "buildspec.yml"
 				},
 				"Artifacts": {
 					"Type": "CODEPIPELINE"
@@ -601,10 +557,10 @@
 				}
 			}
 		},
-		"CodeBuildDeployInboundRole": {
+		"CodeBuildInboundRole": {
 			"Type": "AWS::IAM::Role",
 			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_inbound_deploy",
+				"RoleName": "0x4447_s3_email_codebuild_inbound",
 				"AssumeRolePolicyDocument": {
 					"Version": "2012-10-17",
 					"Statement": [
@@ -624,7 +580,7 @@
 			"Properties": {
 				"Roles": [
 					{
-						"Ref": "CodeBuildDeployInboundRole"
+						"Ref": "CodeBuildInboundRole"
 					}
 				],
 				"PolicyName": "cloud_watch_log_access",
@@ -640,10 +596,10 @@
 							],
 							"Resource": [
 								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound_deploy"
+									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound"
 								},
 								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound_deploy:*"
+									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound:*"
 								}
 							]
 						}
@@ -656,7 +612,7 @@
 			"Properties": {
 				"Roles": [
 					{
-						"Ref": "CodeBuildDeployInboundRole"
+						"Ref": "CodeBuildInboundRole"
 					}
 				],
 				"PolicyName": "s3_access",
@@ -679,7 +635,7 @@
 			"Properties": {
 				"Roles": [
 					{
-						"Ref": "CodeBuildDeployInboundRole"
+						"Ref": "CodeBuildInboundRole"
 					}
 				],
 				"PolicyName": "update_lambda_code",
@@ -691,104 +647,6 @@
 							"Action": "lambda:UpdateFunctionCode",
 							"Resource": {
 								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailInbound}"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildInstallInbound": {
-			"Type": "AWS::CodeBuild::Project",
-			"Properties": {
-				"Name": "0x4447_s3_email_inbound_install",
-				"ServiceRole": {
-					"Fn::GetAtt": [
-						"CodeBuildInstallInboundRole",
-						"Arn"
-					]
-				},
-				"TimeoutInMinutes": 60,
-				"Source": {
-					"Type": "CODEPIPELINE",
-					"BuildSpec": "buildspec-install.yml"
-				},
-				"Artifacts": {
-					"Type": "CODEPIPELINE"
-				},
-				"Environment": {
-					"Type": "LINUX_CONTAINER",
-					"ComputeType": "BUILD_GENERAL1_SMALL",
-					"Image": "aws/codebuild/nodejs:8.11.0"
-				}
-			}
-		},
-		"CodeBuildInstallInboundRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_inbound_install",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "codebuild.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildSetupPolicyCWL": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildInstallInboundRole"
-					}
-				],
-				"PolicyName": "cloud_watch_log_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": [
-								"logs:CreateLogGroup",
-								"logs:CreateLogStream",
-								"logs:PutLogEvents"
-							],
-							"Resource": [
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound_install"
-								},
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound_install:*"
-								}
-							]
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildSetupPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildInstallInboundRole"
-					}
-				],
-				"PolicyName": "s3_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
 							}
 						}
 					]
@@ -816,7 +674,7 @@
 						"Name": "Get",
 						"Actions": [
 							{
-								"Name": "Source",
+								"Name": "Material",
 								"RunOrder": 1,
 								"ActionTypeId": {
 									"Category": "Source",
@@ -844,10 +702,10 @@
 						]
 					},
 					{
-						"Name": "Prepare",
+						"Name": "Cast",
 						"Actions": [
 							{
-								"Name": "Install",
+								"Name": "Mold",
 								"RunOrder": 1,
 								"InputArtifacts": [
 									{
@@ -856,37 +714,7 @@
 								],
 								"Configuration": {
 									"ProjectName": {
-										"Ref": "CodeBuildOutboundInstall"
-									}
-								},
-								"ActionTypeId": {
-									"Category": "Build",
-									"Owner": "AWS",
-									"Provider": "CodeBuild",
-									"Version": "1"
-								},
-								"OutputArtifacts": [
-									{
-										"Name": "prepared"
-									}
-								]
-							}
-						]
-					},
-					{
-						"Name": "Deploy",
-						"Actions": [
-							{
-								"Name": "Code",
-								"RunOrder": 1,
-								"InputArtifacts": [
-									{
-										"Name": "prepared"
-									}
-								],
-								"Configuration": {
-									"ProjectName": {
-										"Ref": "CodeBuildOutboundDeploy"
+										"Ref": "CodeBuildOutbound"
 									}
 								},
 								"ActionTypeId": {
@@ -899,24 +727,6 @@
 						]
 					}
 				]
-			}
-		},
-		"PipelineOutboundRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_codepipeline_outbound",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "codepipeline.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				}
 			}
 		},
 		"PipelineOutboundPolicy": {
@@ -1075,6 +885,154 @@
 				}
 			}
 		},
+		"PipelineOutboundRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "0x4447_s3_email_codepipeline_outbound",
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "codepipeline.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildOutbound": {
+			"Type": "AWS::CodeBuild::Project",
+			"Properties": {
+				"Name": "0x4447_s3_email_outbound",
+				"ServiceRole": {
+					"Fn::GetAtt": [
+						"CodeBuildOutboundRole",
+						"Arn"
+					]
+				},
+				"TimeoutInMinutes": 60,
+				"Source": {
+					"Type": "CODEPIPELINE",
+					"BuildSpec": "buildspec.yml"
+				},
+				"Artifacts": {
+					"Type": "CODEPIPELINE"
+				},
+				"Environment": {
+					"Type": "LINUX_CONTAINER",
+					"ComputeType": "BUILD_GENERAL1_SMALL",
+					"Image": "aws/codebuild/nodejs:8.11.0",
+					"EnvironmentVariables": [
+						{
+							"Name": "FUNCTION_NAME",
+							"Type": "PLAINTEXT",
+							"Value": {
+								"Ref": "LambdaEmailOutbound"
+							}
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildOutboundRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "0x4447_s3_email_codebuild_outbound",
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "codebuild.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildOutboundPolicyCWL": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildOutboundRole"
+					}
+				],
+				"PolicyName": "cloud_watch_log_access",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"logs:CreateLogGroup",
+								"logs:CreateLogStream",
+								"logs:PutLogEvents"
+							],
+							"Resource": [
+								{
+									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_outbound"
+								},
+								{
+									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_outbound:*"
+								}
+							]
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildOutboundPolicyS3": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildOutboundRole"
+					}
+				],
+				"PolicyName": "s3_access",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "s3:*",
+							"Resource": {
+								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
+							}
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildOutboundPolicyLambdaUpdate": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildOutboundRole"
+					}
+				],
+				"PolicyName": "update_lambda_code",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "lambda:UpdateFunctionCode",
+							"Resource": {
+								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailOutbound}"
+							}
+						}
+					]
+				}
+			}
+		},
 		"LambdaEmailOutbound": {
 			"Type": "AWS::Lambda::Function",
 			"Description": "Take the JSON and convert it in to an raw email.",
@@ -1106,7 +1064,7 @@
 			"Type": "AWS::Lambda::Permission",
 			"DependsOn": "LambdaEmailOutbound",
 			"Properties": {
-				"Action": "lambda:invokeFunction",
+				"Action": "lambda:InvokeFunction",
 				"FunctionName": {
 					"Ref": "LambdaEmailOutbound"
 				},
@@ -1183,234 +1141,6 @@
 				}
 			}
 		},
-		"CodeBuildOutboundDeploy": {
-			"Type": "AWS::CodeBuild::Project",
-			"Properties": {
-				"Name": "0x4447_s3_email_outbound_deploy",
-				"ServiceRole": {
-					"Fn::GetAtt": [
-						"CodeBuildOutboundDeployRole",
-						"Arn"
-					]
-				},
-				"TimeoutInMinutes": 60,
-				"Source": {
-					"Type": "CODEPIPELINE",
-					"BuildSpec": "buildspec-deploy.yml"
-				},
-				"Artifacts": {
-					"Type": "CODEPIPELINE"
-				},
-				"Environment": {
-					"Type": "LINUX_CONTAINER",
-					"ComputeType": "BUILD_GENERAL1_SMALL",
-					"Image": "aws/codebuild/nodejs:8.11.0",
-					"EnvironmentVariables": [
-						{
-							"Name": "FUNCTION_NAME",
-							"Type": "PLAINTEXT",
-							"Value": {
-								"Ref": "LambdaEmailOutbound"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildOutboundDeployRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_outbound_deploy",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "codebuild.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildOutboundDeployPolicyCWL": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildOutboundDeployRole"
-					}
-				],
-				"PolicyName": "cloud_watch_log_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": [
-								"logs:CreateLogGroup",
-								"logs:CreateLogStream",
-								"logs:PutLogEvents"
-							],
-							"Resource": [
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_outbound_deploy"
-								},
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_outbound_deploy:*"
-								}
-							]
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildOutboundDeployPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildOutboundDeployRole"
-					}
-				],
-				"PolicyName": "s3_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildOutboundDeployPolicyLambdaUpdate": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildOutboundDeployRole"
-					}
-				],
-				"PolicyName": "update_lambda_code",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "lambda:UpdateFunctionCode",
-							"Resource": {
-								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailOutbound}"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildOutboundInstall": {
-			"Type": "AWS::CodeBuild::Project",
-			"Properties": {
-				"Name": "0x4447_s3_email_outbound_install",
-				"ServiceRole": {
-					"Fn::GetAtt": [
-						"CodeBuildOutboundInstallRole",
-						"Arn"
-					]
-				},
-				"TimeoutInMinutes": 60,
-				"Source": {
-					"Type": "CODEPIPELINE",
-					"BuildSpec": "buildspec-install.yml"
-				},
-				"Artifacts": {
-					"Type": "CODEPIPELINE"
-				},
-				"Environment": {
-					"Type": "LINUX_CONTAINER",
-					"ComputeType": "BUILD_GENERAL1_SMALL",
-					"Image": "aws/codebuild/nodejs:8.11.0"
-				}
-			}
-		},
-		"CodeBuildOutboundInstallRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_outbound_install",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "codebuild.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildOutboundSetupPolicyCWL": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildOutboundInstallRole"
-					}
-				],
-				"PolicyName": "cloud_watch_log_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": [
-								"logs:CreateLogGroup",
-								"logs:CreateLogStream",
-								"logs:PutLogEvents"
-							],
-							"Resource": [
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_outbound_install"
-								},
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_outbound_install:*"
-								}
-							]
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildOutboundSetupPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildOutboundInstallRole"
-					}
-				],
-				"PolicyName": "s3_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
-							}
-						}
-					]
-				}
-			}
-		},
 		"PipelineConverter": {
 			"Type": "AWS::CodePipeline::Pipeline",
 			"Properties": {
@@ -1432,7 +1162,7 @@
 						"Name": "Get",
 						"Actions": [
 							{
-								"Name": "Source",
+								"Name": "Material",
 								"RunOrder": 1,
 								"ActionTypeId": {
 									"Category": "Source",
@@ -1460,10 +1190,10 @@
 						]
 					},
 					{
-						"Name": "Prepare",
+						"Name": "Cast",
 						"Actions": [
 							{
-								"Name": "Install",
+								"Name": "Mold",
 								"RunOrder": 1,
 								"InputArtifacts": [
 									{
@@ -1472,37 +1202,7 @@
 								],
 								"Configuration": {
 									"ProjectName": {
-										"Ref": "CodeBuildInstallConverter"
-									}
-								},
-								"ActionTypeId": {
-									"Category": "Build",
-									"Owner": "AWS",
-									"Provider": "CodeBuild",
-									"Version": "1"
-								},
-								"OutputArtifacts": [
-									{
-										"Name": "prepared"
-									}
-								]
-							}
-						]
-					},
-					{
-						"Name": "Deploy",
-						"Actions": [
-							{
-								"Name": "Code",
-								"RunOrder": 1,
-								"InputArtifacts": [
-									{
-										"Name": "prepared"
-									}
-								],
-								"Configuration": {
-									"ProjectName": {
-										"Ref": "CodeBuildDeployConverter"
+										"Ref": "CodeBuildConverter"
 									}
 								},
 								"ActionTypeId": {
@@ -1691,6 +1391,136 @@
 				}
 			}
 		},
+		"CodeBuildConverter": {
+			"Type": "AWS::CodeBuild::Project",
+			"Properties": {
+				"Name": "0x4447_s3_email_converter",
+				"ServiceRole": {
+					"Fn::GetAtt": [
+						"CodeBuildConverterRole",
+						"Arn"
+					]
+				},
+				"TimeoutInMinutes": 60,
+				"Source": {
+					"Type": "CODEPIPELINE",
+					"BuildSpec": "buildspec.yml"
+				},
+				"Artifacts": {
+					"Type": "CODEPIPELINE"
+				},
+				"Environment": {
+					"Type": "LINUX_CONTAINER",
+					"ComputeType": "BUILD_GENERAL1_SMALL",
+					"Image": "aws/codebuild/nodejs:8.11.0",
+					"EnvironmentVariables": [
+						{
+							"Name": "FUNCTION_NAME",
+							"Type": "PLAINTEXT",
+							"Value": {
+								"Ref": "LambdaEmailConverter"
+							}
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildConverterRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "0x4447_s3_email_codebuild_converter",
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "codebuild.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildConverterPolicyCWL": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildConverterRole"
+					}
+				],
+				"PolicyName": "cloud_watch_log_access",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"logs:CreateLogGroup",
+								"logs:CreateLogStream",
+								"logs:PutLogEvents"
+							],
+							"Resource": [
+								{
+									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_converter"
+								},
+								{
+									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_converter:*"
+								}
+							]
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildConverterPolicyS3": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildConverterRole"
+					}
+				],
+				"PolicyName": "s3_access",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "s3:*",
+							"Resource": {
+								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
+							}
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildConverterPolicyLambdaUpdate": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildConverterRole"
+					}
+				],
+				"PolicyName": "update_lambda_code",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "lambda:UpdateFunctionCode",
+							"Resource": {
+								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailConverter}"
+							}
+						}
+					]
+				}
+			}
+		},
 		"LambdaEmailConverter": {
 			"Type": "AWS::Lambda::Function",
 			"Description": "This Lambda converts raw emails files in to HTML and TEXT ones.",
@@ -1715,7 +1545,7 @@
 			"Type": "AWS::Lambda::Permission",
 			"DependsOn": "LambdaEmailConverter",
 			"Properties": {
-				"Action": "lambda:invokeFunction",
+				"Action": "lambda:InvokeFunction",
 				"FunctionName": {
 					"Ref": "LambdaEmailConverter"
 				},
@@ -1766,234 +1596,6 @@
 									"Fn::Sub": "arn:aws:s3:::${S3Email}/*"
 								}
 							]
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployConverter": {
-			"Type": "AWS::CodeBuild::Project",
-			"Properties": {
-				"Name": "0x4447_s3_email_converter_deploy",
-				"ServiceRole": {
-					"Fn::GetAtt": [
-						"CodeBuildDeployConverterRole",
-						"Arn"
-					]
-				},
-				"TimeoutInMinutes": 60,
-				"Source": {
-					"Type": "CODEPIPELINE",
-					"BuildSpec": "buildspec-deploy.yml"
-				},
-				"Artifacts": {
-					"Type": "CODEPIPELINE"
-				},
-				"Environment": {
-					"Type": "LINUX_CONTAINER",
-					"ComputeType": "BUILD_GENERAL1_SMALL",
-					"Image": "aws/codebuild/nodejs:8.11.0",
-					"EnvironmentVariables": [
-						{
-							"Name": "FUNCTION_NAME",
-							"Type": "PLAINTEXT",
-							"Value": {
-								"Ref": "LambdaEmailConverter"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployConverterRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_converter_deploy",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "codebuild.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployConverterPolicyCWL": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildDeployConverterRole"
-					}
-				],
-				"PolicyName": "cloud_watch_log_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": [
-								"logs:CreateLogGroup",
-								"logs:CreateLogStream",
-								"logs:PutLogEvents"
-							],
-							"Resource": [
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_converter_deploy"
-								},
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_converter_deploy:*"
-								}
-							]
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployConverterPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildDeployConverterRole"
-					}
-				],
-				"PolicyName": "s3_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployConverterPolicyLambdaUpdate": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildDeployConverterRole"
-					}
-				],
-				"PolicyName": "update_lambda_code",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "lambda:UpdateFunctionCode",
-							"Resource": {
-								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailConverter}"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildInstallConverter": {
-			"Type": "AWS::CodeBuild::Project",
-			"Properties": {
-				"Name": "0x4447_s3_email_converter_install",
-				"ServiceRole": {
-					"Fn::GetAtt": [
-						"CodeBuildInstallConverterRole",
-						"Arn"
-					]
-				},
-				"TimeoutInMinutes": 60,
-				"Source": {
-					"Type": "CODEPIPELINE",
-					"BuildSpec": "buildspec-install.yml"
-				},
-				"Artifacts": {
-					"Type": "CODEPIPELINE"
-				},
-				"Environment": {
-					"Type": "LINUX_CONTAINER",
-					"ComputeType": "BUILD_GENERAL1_SMALL",
-					"Image": "aws/codebuild/nodejs:8.11.0"
-				}
-			}
-		},
-		"CodeBuildInstallConverterRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_converter_install",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "codebuild.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildInstallConverterPolicyCWL": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildInstallConverterRole"
-					}
-				],
-				"PolicyName": "cloud_watch_log_convert",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": [
-								"logs:CreateLogGroup",
-								"logs:CreateLogStream",
-								"logs:PutLogEvents"
-							],
-							"Resource": [
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_converter_install"
-								},
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_converter_install:*"
-								}
-							]
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildInstallConverterPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildInstallConverterRole"
-					}
-				],
-				"PolicyName": "s3_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
-							}
 						}
 					]
 				}

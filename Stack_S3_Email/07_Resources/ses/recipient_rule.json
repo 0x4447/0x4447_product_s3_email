@@ -8,11 +8,6 @@
 				"Enabled": true,
 				"Actions": [
 					{
-						"LambdaAction": {
-							"FunctionArn": { "Fn::GetAtt": ["LambdaEmailInbound", "Arn"]}
-						}
-					},
-					{
 						"S3Action": {
 							"BucketName": { "Ref": "S3Email" },
 							"ObjectKeyPrefix": "TMP/email_in"

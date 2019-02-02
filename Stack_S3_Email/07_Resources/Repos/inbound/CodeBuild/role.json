@@ -1,8 +1,8 @@
 {
-	"CodeBuildInstallConverterRole": {
+	"CodeBuildInboundRole": {
 		"Type": "AWS::IAM::Role",
 		"Properties": {
-			"RoleName": "0x4447_s3_email_codebuild_converter_install",
+			"RoleName": "0x4447_s3_email_codebuild_inbound",
 			"AssumeRolePolicyDocument": {
 				"Version": "2012-10-17",
 				"Statement": [

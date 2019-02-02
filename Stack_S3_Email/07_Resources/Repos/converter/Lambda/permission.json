@@ -3,7 +3,7 @@
 		"Type": "AWS::Lambda::Permission",
 		"DependsOn": "LambdaEmailConverter",
 		"Properties": {
-			"Action": "lambda:invokeFunction",
+			"Action": "lambda:InvokeFunction",
 			"FunctionName": { "Ref": "LambdaEmailConverter" },
 			"Principal": "s3.amazonaws.com"
 		}
