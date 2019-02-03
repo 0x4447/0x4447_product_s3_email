@@ -49,7 +49,7 @@ The stack takes advantage of AWS S3, AWS SES, AWS Lambda, and the AWS Trigger sy
 - 3x CodeBuilds
 - 3x Lambdas
 
-All project resources can be found [here](https://github.com/0x4447?utf8=%E2%9C%93&q=0x4447-product-s3-email).
+All project resources can be found [here](https://github.com/topics/0x4447-product-s3-email).
 
 # Auto deploy
 
