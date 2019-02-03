@@ -12,7 +12,7 @@ When you sign up for online services, organize your emails with the `+` characte
 - social+instagram@example.com
 - social+linkedin@example.com
 
-This groups all social emails in the `Social` folder. The possibilities are endless.
+This groups all social emails in the `social` folder. The possibilities are endless.
 
 ### Endless email addresses
 
@@ -22,7 +22,7 @@ Once you add and confirm your domain with SES, you can put any string you want i
 - instagram@example.com
 - linkedin@example.com
 
-> Recive and send email with some skills.
+> Basically receive and send email with some skills.
 
 # DISCLAIMER!
 
@@ -67,42 +67,42 @@ Keep in mind that when you deploy, everything may not work right out of the box.
 You have to add your domain and confirm that you own it. Follow these steps to do so:
 
 1. Go to the SES Dashboard.
-2. Click `Domains` on the left side menu.
-3. Click the blue `Verify a New Domain` button.
-4. Type your domain in the modal and select `Generate DKIM Settings`.
-5. The next window displays all information needed to configure your domain.
-6. Once finisheds, you'll wait some time for the domain to switch from a `pending verification` status to a `verified` status.
+1. Click `Domains` on the left side menu.
+1. Click the blue `Verify a New Domain` button.
+1. Type your domain in the modal and select `Generate DKIM Settings`.
+1. The next window displays all information needed to configure your domain.
+1. Once finisheds, you'll wait some time for the domain to switch from a `pending verification` status to a `verified` status.
 
 ### Enable SES Rule Sets
 
 Deployment creates SES `rule sets`. This should be enabled by default, but it doesn't always happen because of a known bug in CloudFormation. Taking the following steps will enable the rule:
 
 1. Go to the SES Dashboard.
-2. Click `Rule Sets` on the left side menu.
-3. Check `0x4447_S3_Email` on the `Inactive Rule Sets` tab.
-4. Hit `Set as Active Rule Set` to activate the rule.
+1. Click `Rule Sets` on the left side menu.
+1. Check `0x4447_S3_Email` on the `Inactive Rule Sets` tab.
+1. Hit `Set as Active Rule Set` to activate the rule.
 
 # SES Limitations
 
 There are two major limitations with SES:
 
 1. For security reasons, AWS defaults to 200 emails sent per 24 hour period at a rate of 1 email/second. If you need to send more than that, you'll need to ask AWS to increase your limit.
-2. By default, you can't send emails to unverified addresses. If you'd like to be able to send (as opposed to just receiving), you'll need to reach out to AWS to remove this limitation from your account.
+1. By default, you can't send emails to unverified addresses. If you'd like to be able to send (as opposed to just receiving), you'll need to reach out to AWS to remove this limitation from your account.
 
 # How the stack works
 
 **Receiving email**:
 
-1. An email comes to SES and triggers a Lambda function.
-2. The Lambda function sorts the email based on the `To` and `From` fields and stores it in the `Inbox` folder under S3.
-3. The `Inbox` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
+1. An email comes to SES and and it gets stored in `TMP` S3 folder.
+1. S3 will trigger the Inbound Lambda Function which will organize the email based on the `to`, `from` and `date` fields. The raw email will be saved in the `Inbox` folder under S3 with the new custom key path.
+1. The `Inbox` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
 
 **Sending email**:
 
 1. Create a properly formatted JSON file (see the following section).
-2. Save the file to the path `TMP/email_out/json`. The file name and extension are irrelevant as long as the content is text and JSON formatted.
-3. This action triggers a Lambda that generates a raw email, sends it out using SES, and saves the raw message to the `Sent` folder.
-4. The `Sent` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
+1. Save the file to the path `TMP/email_out/json`. The file name and extension are irrelevant as long as the content is text and JSON formatted.
+1. This action triggers a Lambda that generates a raw email, sends it out using SES, and saves the raw message to the `Sent` folder.
+1. The `Sent` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
 
 This flow was designed to take advantage of the S3 trigger system and break each action into a small Lambda.
 
@@ -120,7 +120,17 @@ Create a custom JSON file, then upload it to the `TMP/email_out/json` folder (if
 }
 ```
 
-Remember that the `From` field must contain the domain you added to SES. You won't be able to send emails from unverified domains.
+Remember that the `from` field must contain the domain you added to SES. You won't be able to send emails from unverified domains.
+
+# Backup old emails
+
+A bonus feature of this stack is the possibility to process manually uploaded emails. This is possible thanks to the event driven nature of the stack. Just upload the raw email in the `TMP/email_in` folder, and your emails will be processed automatically.
+
+The only prerequisite is that the email file needs to be the raw representation of the email itself. For example:
+
+- Apple Mail `.eml` format is nothing more then a txt file with the raw content of the email.
+
+Which means you can just upload those files straight up to the S3 bucket.
 
 # Pricing
 
