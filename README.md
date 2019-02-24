@@ -11,6 +11,7 @@ When you sign up for online services, organize your emails with the `+` characte
 - social+facebook@example.com
 - social+instagram@example.com
 - social+linkedin@example.com
+- etc.
 
 This groups all social emails in the `social` folder. The possibilities are endless.
 
@@ -21,6 +22,7 @@ Once you add and confirm your domain with SES, you can put any string you want i
 - facebook@example.com
 - instagram@example.com
 - linkedin@example.com
+- etc.
 
 > Basically receive and send email with some skills.
 
@@ -33,7 +35,7 @@ This stack is available to anyone at no cost, but on an as-is basis. 0x4447 LLC 
 <a target="_blank" href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=zer0x4447-S3-Email&templateURL=https://s3.amazonaws.com/0x4447-drive-cloudformation/s3-email.json">
 <img align="left" style="float: left; margin: 0 10px 0 0;" src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"></a>
 
-All you need to do to deploy this stack is click the button to the left and follow the instructions that CloudFormation provides in your AWS Dashboard.
+All you need to do to deploy this stack is click the button to the left and follow the instructions that CloudFormation provides in your AWS Dashboard. Alternatively you can download the CF file from [here](https://s3.amazonaws.com/0x4447-drive-cloudformation/s3-email.json).
 
 # What will deploy?
 
@@ -126,9 +128,7 @@ Remember that the `from` field must contain the domain you added to SES. You won
 
 A bonus feature of this stack is the possibility to process manually uploaded emails. This is possible thanks to the event driven nature of the stack. Just upload the raw email in the `TMP/email_in` folder, and your emails will be processed automatically.
 
-The only prerequisite is that the email file needs to be the raw representation of the email itself. For example:
-
-- Apple Mail `.eml` format is nothing more then a txt file with the raw content of the email.
+The only prerequisite is that the email file needs to be the raw representation of the email itself. For example: files ending in `.eml` are nothing more than a txt file with the raw content of the email.
 
 Which means you can just upload those files straight up to the S3 bucket.
 
