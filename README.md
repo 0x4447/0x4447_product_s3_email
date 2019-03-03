@@ -6,7 +6,7 @@ The result is an unmanaged email server with unlimited email addresses that also
 
 ### Organizing with a +
 
-When you sign up for online services, organize your emails with the `+` character in this way:
+When you sign up for online services, you can organize your emails with the `+` character in this way:
 
 - social+facebook@example.com
 - social+instagram@example.com
@@ -96,8 +96,8 @@ There are two major limitations with SES:
 **Receiving email**:
 
 1. An email comes to SES and and it gets stored in `TMP` S3 folder.
-1. S3 will trigger the Inbound Lambda Function which will organize the email based on the `to`, `from` and `date` fields. The raw email will be saved in the `Inbox` folder under S3 with the new custom key path.
-1. The `Inbox` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
+1. S3 will trigger the Inbound Lambda Function which will organize the email based on the `to`, `from` and `date` fields. In addition to that, the Lambda will read the domain added to SES, and will use that to determine if the email should land in the `Inbox` or `Sent` folder. If the `to` fields contains the domain from SES, it goes to the `Inbox`, if not, it is assumed the email was sent out.
+1. The `Inbox` or `Sent` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
 
 **Sending email**:
 
