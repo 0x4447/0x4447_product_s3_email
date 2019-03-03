@@ -1,0 +1,19 @@
+{
+	"LambdaEmailInboundPolicySES": {
+		"Type": "AWS::IAM::Policy",
+		"Properties": {
+			"PolicyName": "ses_access",
+			"Roles": [ { "Ref": "LambdaEmailInboundRole" } ],
+			"PolicyDocument": {
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Effect": "Allow",
+						"Action": "ses:ListIdentities",
+						"Resource": "*"
+					}
+				]
+			}
+		}
+	}
+}

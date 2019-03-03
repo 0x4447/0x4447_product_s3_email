@@ -3,10 +3,10 @@ version: 0.2
 phases:
   install:
     commands:
-      - npm install -g @0x4447/grapes@1.0.2
+      - npm install -g @0x4447/grapes@2.0.1
   build:
     commands:
-      - grapes -b -s ./Stack_S3_Email
+      - grapes -s ./Stack_S3_Email
   post_build:
     finally:
       - aws s3 cp ./Stack_S3_Email/CloudFormation.json s3://0x4447-drive-cloudformation/s3-email.json --acl public-read
