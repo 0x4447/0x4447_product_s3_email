@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     commands:
-      - npm install -g @0x4447/grapes@1.0.2
+      - npm install -g @0x4447/grapes@2.0.1
   build:
     commands:
       - grapes -s ./Stack_S3_Email
