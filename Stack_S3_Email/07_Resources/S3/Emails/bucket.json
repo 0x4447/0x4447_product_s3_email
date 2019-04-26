@@ -8,6 +8,15 @@
 		],
 		"Properties": {
 			"BucketName": { "Fn::Sub": "${EmailRestingPlace}" },
+			"LifecycleConfiguration": {
+				"Rules": [{
+					"Id": "24h",
+					"ExpirationInDays": 1,
+					"NoncurrentVersionExpirationInDays": 1,
+					"Prefix": "Today/",
+					"Status": "Enabled"
+				}]
+			},
 			"NotificationConfiguration": {
 				"LambdaConfigurations": [
 					{
@@ -54,6 +63,18 @@
 								"Rules": [{
 									"Name": "prefix",
 									"Value": "Inbox/"
+								}]
+							}
+						}
+					},
+					{
+						"Function": { "Fn::GetAtt": [ "LambdaEmailConverter", "Arn" ] },
+						"Event": "s3:ObjectCreated:Copy",
+						"Filter": {
+							"S3Key": {
+								"Rules": [{
+									"Name": "prefix",
+									"Value": "Today/"
 								}]
 							}
 						}

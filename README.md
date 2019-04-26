@@ -99,6 +99,8 @@ There are two major limitations with SES:
 1. S3 will trigger the Inbound Lambda Function which will organize the email based on the `to`, `from` and `date` fields. In addition to that, the Lambda will read the domain added to SES, and will use that to determine if the email should land in the `Inbox` or `Sent` folder. If the `to` fields contains the domain from SES, it goes to the `Inbox`, if not, it is assumed the email was sent out.
 1. The `Inbox` or `Sent` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
 
+In addition to this flow, when a new email comes in, a copy of it will be saved in the `Today` folder to show you which emails are new. The S3 bucket has a Life Cycle Policy and will delete any email older than one day from the `Today` folder. This way you always know what is new.
+
 **Sending email**:
 
 1. Create a properly formatted JSON file (see the following section).
