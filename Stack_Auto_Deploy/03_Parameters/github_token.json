@@ -1,6 +1,0 @@
-{
-	"GitHubToken": {
-		"Description": "Write the Personal access tokens (can be created under this URL: https://github.com/settings/tokens) for CodePipeline to have access to the GitHub repository, even if it is public.",
-		"Type": "String"
-	}
-}

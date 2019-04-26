@@ -1,6 +1,0 @@
-{
-	"CodePipelineArtifact": {
-		"Description": "The S3 bucket name where CodePipeline will store the artifacts.",
-		"Type": "String"
-	}
-}
