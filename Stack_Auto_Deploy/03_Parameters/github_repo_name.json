@@ -1,6 +1,0 @@
-{
-	"GitHubRepoName": {
-		"Description": "Write the repository name, as it's seen on GitHub.",
-		"Type": "String"
-	}
-}

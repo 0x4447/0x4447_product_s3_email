@@ -1,1 +1,0 @@
-This stack auto deploys the S3-Email solution.

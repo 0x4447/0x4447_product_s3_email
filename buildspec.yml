@@ -6,7 +6,7 @@ phases:
       - npm install -g @0x4447/grapes@2.0.1
   build:
     commands:
-      - grapes -s ./Stack_S3_Email
+      - grapes -s .
   post_build:
     finally:
-      - aws s3 cp ./Stack_S3_Email/CloudFormation.json s3://0x4447-drive-cloudformation/s3-email.json --acl public-read
+      - aws s3 cp ./CloudFormation.json s3://0x4447-drive-cloudformation/s3-email.json --acl public-read

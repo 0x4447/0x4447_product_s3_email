@@ -1,6 +1,0 @@
-{
-	"GitHubOwner": {
-		"Description": "Write the name of the owner of the repository. Either the Org name or the user name.",
-		"Type": "String"
-	}
-}
