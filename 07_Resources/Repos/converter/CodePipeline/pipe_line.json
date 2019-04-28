@@ -4,7 +4,7 @@
 		"Properties": {
 			"Name": "0x4447_s3_email_lambda_converter",
 			"ArtifactStore": {
-				"Location": { "Ref": "S3Code" },
+				"Location": { "Ref": "CodePipelineBucketName" },
 				"Type": "S3"
 			},
 			"RoleArn": { "Fn::GetAtt": ["PipelineConverterRole", "Arn"] },
