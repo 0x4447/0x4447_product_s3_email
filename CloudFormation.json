@@ -12,6 +12,7 @@
 		},
 		"GitHubToken": {
 			"Description": "You need to create a Personal access tokens (https://github.com/settings/tokens) for CodePipeline to have access to the GitHub repo despite it being public.",
+			"NoEcho": true,
 			"Type": "String"
 		},
 		"Stage": {
@@ -52,14 +53,6 @@
 			"Type": "AWS::SES::ReceiptRuleSet",
 			"Properties": {
 				"RuleSetName": "0x4447_S3_Email"
-			}
-		},
-		"S3Code": {
-			"Type": "AWS::S3::Bucket",
-			"Properties": {
-				"BucketName": {
-					"Fn::Sub": "${CodePipelineBucketName}"
-				}
 			}
 		},
 		"S3Email": {
@@ -222,7 +215,7 @@
 				"Name": "0x4447_s3_email_lambda_converter",
 				"ArtifactStore": {
 					"Location": {
-						"Ref": "S3Code"
+						"Ref": "CodePipelineBucketName"
 					},
 					"Type": "S3"
 				},
@@ -466,6 +459,86 @@
 				}
 			}
 		},
+		"LambdaEmailConverter": {
+			"Type": "AWS::Lambda::Function",
+			"Description": "This Lambda converts raw emails files in to HTML and TEXT ones.",
+			"Properties": {
+				"FunctionName": "0x4447-s3-email-converter",
+				"Code": {
+					"ZipFile": "exports.handler = async (event) => {return true;};"
+				},
+				"Handler": "index.handler",
+				"MemorySize": 128,
+				"Role": {
+					"Fn::GetAtt": [
+						"LambdaEmailConverterRole",
+						"Arn"
+					]
+				},
+				"Runtime": "nodejs8.10",
+				"Timeout": 60
+			}
+		},
+		"S3ConverterPermission": {
+			"Type": "AWS::Lambda::Permission",
+			"DependsOn": "LambdaEmailConverter",
+			"Properties": {
+				"Action": "lambda:InvokeFunction",
+				"FunctionName": {
+					"Ref": "LambdaEmailConverter"
+				},
+				"Principal": "s3.amazonaws.com"
+			}
+		},
+		"LambdaEmailConverterRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "0x4447_s3_email_lambda_converter",
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "lambda.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				},
+				"ManagedPolicyArns": [
+					"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+				]
+			}
+		},
+		"LambdaEmailConverterPolicyS3": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "S3_access",
+				"Roles": [
+					{
+						"Ref": "LambdaEmailConverterRole"
+					}
+				],
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "s3:*",
+							"Resource": [
+								{
+									"Fn::Sub": "arn:aws:s3:::${S3Email}"
+								},
+								{
+									"Fn::Sub": "arn:aws:s3:::${S3Email}/*"
+								}
+							]
+						}
+					]
+				}
+			}
+		},
 		"CodeBuildConverter": {
 			"Type": "AWS::CodeBuild::Project",
 			"Properties": {
@@ -566,7 +639,7 @@
 							"Effect": "Allow",
 							"Action": "s3:*",
 							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
+								"Fn::Sub": "arn:aws:s3:::${CodePipelineBucketName}/*"
 							}
 						}
 					]
@@ -596,93 +669,13 @@
 				}
 			}
 		},
-		"LambdaEmailConverter": {
-			"Type": "AWS::Lambda::Function",
-			"Description": "This Lambda converts raw emails files in to HTML and TEXT ones.",
-			"Properties": {
-				"FunctionName": "0x4447-s3-email-converter",
-				"Code": {
-					"ZipFile": "exports.handler = async (event) => {return true;};"
-				},
-				"Handler": "index.handler",
-				"MemorySize": 128,
-				"Role": {
-					"Fn::GetAtt": [
-						"LambdaEmailConverterRole",
-						"Arn"
-					]
-				},
-				"Runtime": "nodejs8.10",
-				"Timeout": 60
-			}
-		},
-		"S3ConverterPermission": {
-			"Type": "AWS::Lambda::Permission",
-			"DependsOn": "LambdaEmailConverter",
-			"Properties": {
-				"Action": "lambda:InvokeFunction",
-				"FunctionName": {
-					"Ref": "LambdaEmailConverter"
-				},
-				"Principal": "s3.amazonaws.com"
-			}
-		},
-		"LambdaEmailConverterRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_lambda_converter",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "lambda.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				},
-				"ManagedPolicyArns": [
-					"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-				]
-			}
-		},
-		"LambdaEmailConverterPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"PolicyName": "S3_access",
-				"Roles": [
-					{
-						"Ref": "LambdaEmailConverterRole"
-					}
-				],
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": [
-								{
-									"Fn::Sub": "arn:aws:s3:::${S3Email}"
-								},
-								{
-									"Fn::Sub": "arn:aws:s3:::${S3Email}/*"
-								}
-							]
-						}
-					]
-				}
-			}
-		},
 		"PipelineOutbound": {
 			"Type": "AWS::CodePipeline::Pipeline",
 			"Properties": {
 				"Name": "0x4447_s3_email_lambda_outbound",
 				"ArtifactStore": {
 					"Location": {
-						"Ref": "S3Code"
+						"Ref": "CodePipelineBucketName"
 					},
 					"Type": "S3"
 				},
@@ -926,109 +919,19 @@
 				}
 			}
 		},
-		"LambdaEmailOutboundRole": {
+		"CodeBuildOutboundRole": {
 			"Type": "AWS::IAM::Role",
 			"Properties": {
-				"RoleName": "0x4447_s3_email_lambda_outbound",
+				"RoleName": "0x4447_s3_email_codebuild_outbound",
 				"AssumeRolePolicyDocument": {
 					"Version": "2012-10-17",
 					"Statement": [
 						{
 							"Effect": "Allow",
 							"Principal": {
-								"Service": "lambda.amazonaws.com"
+								"Service": "codebuild.amazonaws.com"
 							},
 							"Action": "sts:AssumeRole"
-						}
-					]
-				},
-				"ManagedPolicyArns": [
-					"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-				]
-			}
-		},
-		"LambdaEmailOutbound": {
-			"Type": "AWS::Lambda::Function",
-			"Description": "Take the JSON and convert it in to an raw email.",
-			"Properties": {
-				"FunctionName": "0x4447-s3-email-outbound",
-				"Code": {
-					"ZipFile": "exports.handler = async (event) => {return true;};"
-				},
-				"Handler": "index.handler",
-				"MemorySize": 128,
-				"Role": {
-					"Fn::GetAtt": [
-						"LambdaEmailOutboundRole",
-						"Arn"
-					]
-				},
-				"Runtime": "nodejs8.10",
-				"Timeout": 60,
-				"Environment": {
-					"Variables": {
-						"BUCKET": {
-							"Ref": "EmailRestingPlace"
-						}
-					}
-				}
-			}
-		},
-		"S3OutboundPermission": {
-			"Type": "AWS::Lambda::Permission",
-			"DependsOn": "LambdaEmailOutbound",
-			"Properties": {
-				"Action": "lambda:InvokeFunction",
-				"FunctionName": {
-					"Ref": "LambdaEmailOutbound"
-				},
-				"Principal": "s3.amazonaws.com"
-			}
-		},
-		"LambdaEmailOutboundPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"PolicyName": "S3_access",
-				"Roles": [
-					{
-						"Ref": "LambdaEmailOutboundRole"
-					}
-				],
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": [
-								{
-									"Fn::Sub": "arn:aws:s3:::${S3Email}"
-								},
-								{
-									"Fn::Sub": "arn:aws:s3:::${S3Email}/*"
-								}
-							]
-						}
-					]
-				}
-			}
-		},
-		"LambdaEmailOutboundPolicySES": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"PolicyName": "ses",
-				"Roles": [
-					{
-						"Ref": "LambdaEmailOutboundRole"
-					}
-				],
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "ses:SendRawEmail",
-							"Resource": "*"
 						}
 					]
 				}
@@ -1063,24 +966,6 @@
 							"Value": {
 								"Ref": "LambdaEmailOutbound"
 							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildOutboundRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_outbound",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "codebuild.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
 						}
 					]
 				}
@@ -1134,7 +1019,7 @@
 							"Effect": "Allow",
 							"Action": "s3:*",
 							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
+								"Fn::Sub": "arn:aws:s3:::${CodePipelineBucketName}/*"
 							}
 						}
 					]
@@ -1164,13 +1049,121 @@
 				}
 			}
 		},
+		"LambdaEmailOutbound": {
+			"Type": "AWS::Lambda::Function",
+			"Description": "Take the JSON and convert it in to an raw email.",
+			"Properties": {
+				"FunctionName": "0x4447-s3-email-outbound",
+				"Code": {
+					"ZipFile": "exports.handler = async (event) => {return true;};"
+				},
+				"Handler": "index.handler",
+				"MemorySize": 128,
+				"Role": {
+					"Fn::GetAtt": [
+						"LambdaEmailOutboundRole",
+						"Arn"
+					]
+				},
+				"Runtime": "nodejs8.10",
+				"Timeout": 60,
+				"Environment": {
+					"Variables": {
+						"BUCKET": {
+							"Ref": "EmailRestingPlace"
+						}
+					}
+				}
+			}
+		},
+		"S3OutboundPermission": {
+			"Type": "AWS::Lambda::Permission",
+			"DependsOn": "LambdaEmailOutbound",
+			"Properties": {
+				"Action": "lambda:InvokeFunction",
+				"FunctionName": {
+					"Ref": "LambdaEmailOutbound"
+				},
+				"Principal": "s3.amazonaws.com"
+			}
+		},
+		"LambdaEmailOutboundRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "0x4447_s3_email_lambda_outbound",
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "lambda.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				},
+				"ManagedPolicyArns": [
+					"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+				]
+			}
+		},
+		"LambdaEmailOutboundPolicyS3": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "S3_access",
+				"Roles": [
+					{
+						"Ref": "LambdaEmailOutboundRole"
+					}
+				],
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "s3:*",
+							"Resource": [
+								{
+									"Fn::Sub": "arn:aws:s3:::${S3Email}"
+								},
+								{
+									"Fn::Sub": "arn:aws:s3:::${S3Email}/*"
+								}
+							]
+						}
+					]
+				}
+			}
+		},
+		"LambdaEmailOutboundPolicySES": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "ses",
+				"Roles": [
+					{
+						"Ref": "LambdaEmailOutboundRole"
+					}
+				],
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "ses:SendRawEmail",
+							"Resource": "*"
+						}
+					]
+				}
+			}
+		},
 		"PipelineInbound": {
 			"Type": "AWS::CodePipeline::Pipeline",
 			"Properties": {
 				"Name": "0x4447_s3_email_lambda_inbound",
 				"ArtifactStore": {
 					"Location": {
-						"Ref": "S3Code"
+						"Ref": "CodePipelineBucketName"
 					},
 					"Type": "S3"
 				},
@@ -1414,134 +1407,25 @@
 				}
 			}
 		},
-		"CodeBuildInbound": {
-			"Type": "AWS::CodeBuild::Project",
-			"Properties": {
-				"Name": "0x4447_s3_email_inbound",
-				"ServiceRole": {
-					"Fn::GetAtt": [
-						"CodeBuildInboundRole",
-						"Arn"
-					]
-				},
-				"TimeoutInMinutes": 60,
-				"Source": {
-					"Type": "CODEPIPELINE",
-					"BuildSpec": "buildspec.yml"
-				},
-				"Artifacts": {
-					"Type": "CODEPIPELINE"
-				},
-				"Environment": {
-					"Type": "LINUX_CONTAINER",
-					"ComputeType": "BUILD_GENERAL1_SMALL",
-					"Image": "aws/codebuild/nodejs:8.11.0",
-					"EnvironmentVariables": [
-						{
-							"Name": "FUNCTION_NAME",
-							"Type": "PLAINTEXT",
-							"Value": {
-								"Ref": "LambdaEmailInbound"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildInboundRole": {
+		"LambdaEmailInboundRole": {
 			"Type": "AWS::IAM::Role",
 			"Properties": {
-				"RoleName": "0x4447_s3_email_codebuild_inbound",
+				"RoleName": "0x4447_s3_email_lambda_inbound",
 				"AssumeRolePolicyDocument": {
 					"Version": "2012-10-17",
 					"Statement": [
 						{
 							"Effect": "Allow",
 							"Principal": {
-								"Service": "codebuild.amazonaws.com"
+								"Service": "lambda.amazonaws.com"
 							},
 							"Action": "sts:AssumeRole"
 						}
 					]
-				}
-			}
-		},
-		"CodeBuildDeployPolicyCWL": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildInboundRole"
-					}
-				],
-				"PolicyName": "cloud_watch_log_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": [
-								"logs:CreateLogGroup",
-								"logs:CreateLogStream",
-								"logs:PutLogEvents"
-							],
-							"Resource": [
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound"
-								},
-								{
-									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound:*"
-								}
-							]
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployPolicyLambdaUpdate": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildInboundRole"
-					}
-				],
-				"PolicyName": "update_lambda_code",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "lambda:UpdateFunctionCode",
-							"Resource": {
-								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailInbound}"
-							}
-						}
-					]
-				}
-			}
-		},
-		"CodeBuildDeployPolicyS3": {
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"Roles": [
-					{
-						"Ref": "CodeBuildInboundRole"
-					}
-				],
-				"PolicyName": "s3_access",
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": "s3:*",
-							"Resource": {
-								"Fn::Sub": "arn:aws:s3:::${S3Code}/*"
-							}
-						}
-					]
-				}
+				},
+				"ManagedPolicyArns": [
+					"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+				]
 			}
 		},
 		"S3InboundPermission": {
@@ -1580,27 +1464,6 @@
 						}
 					}
 				}
-			}
-		},
-		"LambdaEmailInboundRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"RoleName": "0x4447_s3_email_lambda_inbound",
-				"AssumeRolePolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Principal": {
-								"Service": "lambda.amazonaws.com"
-							},
-							"Action": "sts:AssumeRole"
-						}
-					]
-				},
-				"ManagedPolicyArns": [
-					"arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-				]
 			}
 		},
 		"LambdaEmailInboundPolicyS3": {
@@ -1647,6 +1510,136 @@
 							"Effect": "Allow",
 							"Action": "ses:ListIdentities",
 							"Resource": "*"
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildInboundRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "0x4447_s3_email_codebuild_inbound",
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "codebuild.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildInbound": {
+			"Type": "AWS::CodeBuild::Project",
+			"Properties": {
+				"Name": "0x4447_s3_email_inbound",
+				"ServiceRole": {
+					"Fn::GetAtt": [
+						"CodeBuildInboundRole",
+						"Arn"
+					]
+				},
+				"TimeoutInMinutes": 60,
+				"Source": {
+					"Type": "CODEPIPELINE",
+					"BuildSpec": "buildspec.yml"
+				},
+				"Artifacts": {
+					"Type": "CODEPIPELINE"
+				},
+				"Environment": {
+					"Type": "LINUX_CONTAINER",
+					"ComputeType": "BUILD_GENERAL1_SMALL",
+					"Image": "aws/codebuild/nodejs:8.11.0",
+					"EnvironmentVariables": [
+						{
+							"Name": "FUNCTION_NAME",
+							"Type": "PLAINTEXT",
+							"Value": {
+								"Ref": "LambdaEmailInbound"
+							}
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildDeployPolicyCWL": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildInboundRole"
+					}
+				],
+				"PolicyName": "cloud_watch_log_access",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"logs:CreateLogGroup",
+								"logs:CreateLogStream",
+								"logs:PutLogEvents"
+							],
+							"Resource": [
+								{
+									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound"
+								},
+								{
+									"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/0x4447_s3_email_inbound:*"
+								}
+							]
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildDeployPolicyS3": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildInboundRole"
+					}
+				],
+				"PolicyName": "s3_access",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "s3:*",
+							"Resource": {
+								"Fn::Sub": "arn:aws:s3:::${CodePipelineBucketName}/*"
+							}
+						}
+					]
+				}
+			}
+		},
+		"CodeBuildDeployPolicyLambdaUpdate": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"Roles": [
+					{
+						"Ref": "CodeBuildInboundRole"
+					}
+				],
+				"PolicyName": "update_lambda_code",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": "lambda:UpdateFunctionCode",
+							"Resource": {
+								"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaEmailInbound}"
+							}
 						}
 					]
 				}
