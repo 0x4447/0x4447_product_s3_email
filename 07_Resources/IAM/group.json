@@ -1,0 +1,40 @@
+{
+	"IAMGroup": {
+		"Type": "AWS::IAM::Group",
+		"Properties": {
+			"GroupName": "0x4447_s3_email",
+			"Policies": [
+				{
+					"PolicyName": "l_r_w_d_plus_rename",
+					"PolicyDocument": {
+						"Version": "2012-10-17",
+						"Statement": [
+							{
+								"Effect": "Allow",
+								"Action": [
+									"s3:ListBucket",
+									"s3:GetObject",
+									"s3:PutObject",
+									"s3:DeleteObject",
+									"s3:GetObjectAcl",
+									"s3:GetObjectVersionAcl",
+									"s3:PutObjectAcl",
+									"s3:PutObjectVersionAcl"
+								],
+								"Resource": [
+									{ "Fn::Sub": "arn:aws:s3:::${S3Email}" },
+									{ "Fn::Sub": "arn:aws:s3:::${S3Email}/*" }
+								]
+							},
+							{
+								"Effect": "Allow",
+								"Action": "s3:ListAllMyBuckets",
+								"Resource": "*"
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}

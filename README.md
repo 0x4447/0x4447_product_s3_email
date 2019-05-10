@@ -50,6 +50,7 @@ The stack takes advantage of AWS S3, AWS SES, AWS Lambda, and the AWS Trigger sy
 - 3x CodePipelines
 - 3x CodeBuilds
 - 3x Lambdas
+- 1x IAM Group
 
 All project resources can be found [here](https://github.com/topics/0x4447-product-s3-email).
 
@@ -83,6 +84,10 @@ Deployment creates SES `rule sets`. This should be enabled by default, but it do
 1. Click `Rule Sets` on the left side menu.
 1. Check `0x4447_S3_Email` on the `Inactive Rule Sets` tab.
 1. Hit `Set as Active Rule Set` to activate the rule.
+
+### Attach user to the IAM Group
+
+After the stack is deployed you get a IAM Group with the bare minimum policy to allow to access the S3 Bucket with the emails. Use this group to give access to your IAM user to S3 Email.
 
 # SES Limitations
 
