@@ -1,6 +1,6 @@
 {
 	"CodePipelineBucketName": {
-		"Description": "The S3 bucket name where CodePipeline will store the artifacts (this is needed only by CP to work, and pass task results to the next stage).",
+		"Description": "The S3 bucket name where CodePipeline will store the artifacts (this is needed only by CP to work, and pass task results to the next stage) - (This bucket needs to exist already in S3)",
 		"Type": "String"
 	}
 }

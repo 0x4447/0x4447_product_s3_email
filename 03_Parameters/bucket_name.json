@@ -1,6 +1,6 @@
 {
 	"EmailRestingPlace": {
-		"Description": "The S3 bucket name where the emails will be stored when they come through AWS SES.",
+		"Description": "The S3 bucket name where the emails will be stored when they come through AWS SES. (This bucket will be made for you)",
 		"Type": "String"
 	}
 }
