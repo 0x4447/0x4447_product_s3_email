@@ -61,6 +61,14 @@ The stack is set up in a such a way that any time new code is pushed to a select
 - **master**: the latest stable code
 - **development**: unstable code that we test in our test environment - we don't recommend that you use this branch
 
+# Fork Repos
+- Fork the following repos for Webhooks to work:
+1. 0x4447-product-s3-email-lambda-outbound
+2. 0x4447-product-s3-email-lambda-inbound
+3. 0x4447-product-s3-email-lambda-converter
+- Your GitHub access token must have public repo read and webhook read.
+- In parameters of CloudFormation template, specify your GitHub username you forked the projects under.
+
 # Manual work
 
 Keep in mind that when you deploy, everything may not work right out of the box.

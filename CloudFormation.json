@@ -24,6 +24,11 @@
 			],
 			"Default": "master",
 			"ConstraintDescription": "must only contain lowercase letters and numbers, and can't start with a number."
+		},
+		"Owner": {
+			"Description": "Select your GitHub user name.",
+			"Type": "String",
+			"Default": "0x4447"
 		}
 	},
 	"Resources": {
@@ -281,7 +286,7 @@
 									"Version": "1"
 								},
 								"Configuration": {
-									"Owner": "0x4447",
+									"Owner": { "Ref": "Owner"},
 									"Repo": "0x4447-product-s3-email-lambda-outbound",
 									"Branch": {
 										"Ref": "Stage"
@@ -797,7 +802,7 @@
 									"Version": "1"
 								},
 								"Configuration": {
-									"Owner": "0x4447",
+									"Owner": { "Ref": "Owner"},
 									"Repo": "0x4447-product-s3-email-lambda-inbound",
 									"Branch": {
 										"Ref": "Stage"
@@ -1313,7 +1318,7 @@
 									"Version": "1"
 								},
 								"Configuration": {
-									"Owner": "0x4447",
+									"Owner": { "Ref": "Owner"},
 									"Repo": "0x4447-product-s3-email-lambda-converter",
 									"Branch": {
 										"Ref": "Stage"
