@@ -1,6 +1,6 @@
 {
 	"GitHubToken": {
-		"Description": "You need to create a Personal access tokens (https://github.com/settings/tokens) for CodePipeline to have access to the GitHub repo despite it being public.",
+		"Description": "You need to create a Personal access tokens (https://github.com/settings/tokens) for CodePipeline to have access to the GitHub repo even if they are public, and the Scope has to have: repo and admin:repo_hook",
 		"NoEcho": true,
 		"Type": "String"
 	}
