@@ -4,17 +4,6 @@ This stack was created out of frustration due to the fact that to this day there
 
 The result is an unmanaged email server with unlimited email addresses that also offers the benefit of easily organizing messages by adding the `+` character to the email names. The `+` is converted to a `/`, which correlates to an object path in S3.
 
-### Organizing with a +
-
-When you sign up for online services, you can organize your emails with the `+` character in this way:
-
-- social+facebook@example.com
-- social+instagram@example.com
-- social+linkedin@example.com
-- etc.
-
-This groups all social emails in the `social` folder. The possibilities are endless.
-
 ### Endless email addresses
 
 Once you add and confirm your domain with SES, you can put any string you want in front of the `@`, as long as it conforms to the email address standard. This means that you'll have endless email addresses at your disposal, and you'll be able to organize your life in a way never possible before. For example, you can give each service you sign up for its own special email:
@@ -24,7 +13,36 @@ Once you add and confirm your domain with SES, you can put any string you want i
 - linkedin@example.com
 - etc.
 
-> Basically receive and send email with some skills.
+### Organizing with a +
+
+With that said, you can organize your emails with the `+` character in this way:
+
+- accounts+social+facebook@example.com
+- accounts+social+instagram@example.com
+- accounts+social+linkedin@example.com
+- accounts+travel+car+hertz@example.com
+- accounts+travel+air+jetblue@example.com
+- accounts+money+paypal@example.com
+- etc.
+
+When dealing with clients we came up with this folder structure:
+
+- clients+company_name+aws+account_name@example.com
+- clients+company_name+stripe@example.com
+- clients+company_name+sentry@example.com
+- clients+company_name+heroku@example.com
+- etc.
+
+For all sorts of alerts we like to group them like this
+
+- alarms+company_name+aws+account_name+alarm_type@example.com
+- alarms+company_name+sentry+alarm_type@example.com
+
+- etc.
+
+This groups all emails in the corresponding folder by replacing the `+` with a `/` character which creates a folder structure in S3. The possibilities are endless.
+
+> Basically, receive and send email with some skills.
 
 # DISCLAIMER!
 
@@ -65,7 +83,7 @@ The stack is set up in a such a way that any time new code is pushed to a select
 
 Keep in mind that when you deploy, everything may not work right out of the box.
 
-### Confirm that you own the domain
+### Confirm to SES that you own the domain
 
 You have to add your domain and confirm that you own it. Follow these steps to do so:
 
@@ -87,7 +105,7 @@ Deployment creates SES `rule sets`. This should be enabled by default, but it do
 
 ### Attach user to the IAM Group
 
-After the stack is deployed you get a IAM Group with the bare minimum policy to allow to access the S3 Bucket with the emails. Use this group to give access to your IAM user to S3 Email.
+After the stack is deployed you'll get a IAM Group with a policy attached that will give a user using it the bare minimum to access to the S3-Bucket to read and create emails.
 
 # SES Limitations
 
@@ -101,10 +119,10 @@ There are two major limitations with SES:
 **Receiving email**:
 
 1. An email comes to SES and and it gets stored in `TMP` S3 folder.
-1. S3 will trigger the Inbound Lambda Function which will organize the email based on the `to`, `from` and `date` fields. In addition to that, the Lambda will read the domain added to SES, and will use that to determine if the email should land in the `Inbox` or `Sent` folder. If the `to` fields contains the domain from SES, it goes to the `Inbox`, if not, it is assumed the email was sent out.
-1. The `Inbox` or `Sent` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message.
+1. S3 will trigger the Inbound Lambda Function which will organize the email based on the `to`, `from` and `date` fields. In addition to that, the Lambda will read the domain(s) added to SES, and will use that data to determine if the email should land in the `Inbox` or `Sent` folder. If the `to` fields contains the domain from SES, it goes to the `Inbox`, if not, it is assumed the email was sent out.
+1. The `Inbox` or `Sent` folder triggers another Lambda function that loads the raw email, converts it to a `.html` and `.txt` file, and stores it alongside the original message, while storing any attachments in the `attachments`.
 
-In addition to this flow, when a new email comes in, a copy of it will be saved in the `Today` folder to show you which emails are new. The S3 bucket has a Life Cycle Policy and will delete any email older than one day from the `Today` folder. This way you always know what is new.
+In addition to this flow, when a new email comes in, a copy of it will be saved in the `Today` folder to show you which emails are new. The S3 bucket has a Life Cycle Policy and will delete any email older than one day from the `Today` folder. This way you always know what's new.
 
 **Sending email**:
 
