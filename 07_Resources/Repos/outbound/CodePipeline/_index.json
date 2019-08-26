@@ -25,7 +25,7 @@
 								"Owner": { "Ref": "ParamGitHubAccountName" },
 								"Repo": "0x4447-product-s3-email-lambda-outbound",
 								"Branch": { "Ref": "Stage" },
-								"PollForSourceChanges": true,
+								"PollForSourceChanges": false,
 								"OAuthToken": { "Ref": "GitHubToken" }
 							},
 							"OutputArtifacts": [

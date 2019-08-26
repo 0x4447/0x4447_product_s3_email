@@ -1,13 +1,13 @@
 {
-	"PipelineInbound": {
+	"PipelineConverter": {
 		"Type": "AWS::CodePipeline::Pipeline",
 		"Properties": {
-			"Name": "0x4447_s3_email_lambda_inbound",
+			"Name": "0x4447_s3_email_lambda_converter",
 			"ArtifactStore": {
 				"Location": { "Ref": "CodePipelineBucketName" },
 				"Type": "S3"
 			},
-			"RoleArn": { "Fn::GetAtt": ["PipelineInboundRole", "Arn"] },
+			"RoleArn": { "Fn::GetAtt": ["PipelineConverterRole", "Arn"] },
 			"Stages": [
 				{
 					"Name": "Get",
@@ -23,9 +23,9 @@
 							},
 							"Configuration": {
 								"Owner": { "Ref": "ParamGitHubAccountName" },
-								"Repo": "0x4447-product-s3-email-lambda-inbound",
+								"Repo": "0x4447-product-s3-email-lambda-converter",
 								"Branch": { "Ref": "Stage" },
-								"PollForSourceChanges": true,
+								"PollForSourceChanges": false,
 								"OAuthToken": { "Ref": "GitHubToken" }
 							},
 							"OutputArtifacts": [
@@ -48,7 +48,7 @@
 								}
 							],
 							"Configuration": {
-								"ProjectName": { "Ref": "CodeBuildInbound" }
+								"ProjectName": { "Ref": "CodeBuildConverter" }
 							},
 							"ActionTypeId": {
 								"Category": "Build",

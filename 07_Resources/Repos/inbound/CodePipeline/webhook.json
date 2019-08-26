@@ -1,0 +1,21 @@
+{
+	"PipelineInboundWebhook": {
+		"Type": "AWS::CodePipeline::Webhook",
+		"Properties": {
+			"Authentication": "GITHUB_HMAC",
+			"AuthenticationConfiguration": {
+				"SecretToken": { "Ref": "GitHubToken" }
+			},
+			"Filters": [
+				{
+					"JsonPath": "$.ref",
+					"MatchEquals": "refs/heads/{Branch}"
+				}
+			],
+			"TargetPipeline": { "Ref": "PipelineInbound" },
+			"TargetAction": "Material",
+			"TargetPipelineVersion": { "Fn::GetAtt": [ "PipelineInbound", "Version" ]},
+			"RegisterWithThirdParty": true
+		}
+	}
+}

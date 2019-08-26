@@ -96,7 +96,7 @@ You have to add your domain and confirm that you own it. Follow these steps to d
 
 ### Enable SES Rule Sets
 
-Deployment creates SES `rule sets`. This should be enabled by default, but it doesn't always happen because of a known bug in CloudFormation. Taking the following steps will enable the rule:
+Deployment creates SES `rule sets`. This should be enabled by default on fresh AWS accounts, but on accounts where you already had some rules, this won't work. This behavior is a known bug by AWS in CloudFormation. Taking the following steps will enable the rule:
 
 1. Go to the SES Dashboard.
 1. Click `Rule Sets` on the left side menu.
