@@ -1,0 +1,7 @@
+{
+	"ParamGitHubAccountName": {
+		"Description": "The name of the GitHub account, it is the same names that you find in the URL. Organization or private account.",
+		"Type": "String",
+		"Default": "0x4447"
+	}
+}

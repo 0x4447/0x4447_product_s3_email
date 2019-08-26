@@ -22,7 +22,7 @@
 								"Version": "1"
 							},
 							"Configuration": {
-								"Owner": "0x4447",
+								"Owner": { "Ref": "ParamGitHubAccountName" },
 								"Repo": "0x4447-product-s3-email-lambda-inbound",
 								"Branch": { "Ref": "Stage" },
 								"PollForSourceChanges": true,
