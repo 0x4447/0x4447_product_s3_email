@@ -3,11 +3,11 @@
 	"Description": "This stack will create a solution where you get infinite emails using AWS SES and S3.",
 	"Parameters": {
 		"EmailRestingPlace": {
-			"Description": "The S3 bucket name where the emails will be stored when they come through AWS SES.",
+			"Description": "The S3 bucket name where the emails will be stored when they come through AWS SES. (This bucket will be made for you)",
 			"Type": "String"
 		},
 		"CodePipelineBucketName": {
-			"Description": "The S3 bucket name where CodePipeline will store the artifacts (this is needed only by CP to work, and pass task results to the next stage).",
+			"Description": "The S3 bucket name where CodePipeline will store the artifacts (this is needed only by CP to work, and pass task results to the next stage) - (This bucket needs to exist already in S3)",
 			"Type": "String"
 		},
 		"ParamGitHubAccountName": {
@@ -121,6 +121,24 @@
 							"NoncurrentVersionExpirationInDays": 1,
 							"Prefix": "Today/",
 							"Status": "Enabled"
+						},
+						{
+							"Id": "Intelligent transition for Inbox",
+							"Status": "Enabled",
+							"Prefix": "Inbox/",
+							"Transition": {
+								"StorageClass": "INTELLIGENT_TIERING",
+								"TransitionInDays": 0
+							}
+						},
+						{
+							"Id": "Intelligent transition for Sent",
+							"Status": "Enabled",
+							"Prefix": "Sent/",
+							"Transition": {
+								"StorageClass": "INTELLIGENT_TIERING",
+								"TransitionInDays": 0
+							}
 						}
 					]
 				},
@@ -293,7 +311,7 @@
 									"Branch": {
 										"Ref": "Stage"
 									},
-									"PollForSourceChanges": true,
+									"PollForSourceChanges": false,
 									"OAuthToken": {
 										"Ref": "GitHubToken"
 									}
@@ -506,6 +524,34 @@
 						}
 					]
 				}
+			}
+		},
+		"PipelineConverterWebhook": {
+			"Type": "AWS::CodePipeline::Webhook",
+			"Properties": {
+				"Authentication": "GITHUB_HMAC",
+				"AuthenticationConfiguration": {
+					"SecretToken": {
+						"Ref": "GitHubToken"
+					}
+				},
+				"Filters": [
+					{
+						"JsonPath": "$.ref",
+						"MatchEquals": "refs/heads/{Branch}"
+					}
+				],
+				"TargetPipeline": {
+					"Ref": "PipelineConverter"
+				},
+				"TargetAction": "Material",
+				"TargetPipelineVersion": {
+					"Fn::GetAtt": [
+						"PipelineConverter",
+						"Version"
+					]
+				},
+				"RegisterWithThirdParty": true
 			}
 		},
 		"CodeBuildConverter": {
@@ -755,7 +801,7 @@
 									"Branch": {
 										"Ref": "Stage"
 									},
-									"PollForSourceChanges": true,
+									"PollForSourceChanges": false,
 									"OAuthToken": {
 										"Ref": "GitHubToken"
 									}
@@ -968,6 +1014,34 @@
 						}
 					]
 				}
+			}
+		},
+		"PipelineOutboundWebhook": {
+			"Type": "AWS::CodePipeline::Webhook",
+			"Properties": {
+				"Authentication": "GITHUB_HMAC",
+				"AuthenticationConfiguration": {
+					"SecretToken": {
+						"Ref": "GitHubToken"
+					}
+				},
+				"Filters": [
+					{
+						"JsonPath": "$.ref",
+						"MatchEquals": "refs/heads/{Branch}"
+					}
+				],
+				"TargetPipeline": {
+					"Ref": "PipelineOutbound"
+				},
+				"TargetAction": "Material",
+				"TargetPipelineVersion": {
+					"Fn::GetAtt": [
+						"PipelineOutbound",
+						"Version"
+					]
+				},
+				"RegisterWithThirdParty": true
 			}
 		},
 		"CodeBuildOutbound": {
@@ -1245,7 +1319,7 @@
 									"Branch": {
 										"Ref": "Stage"
 									},
-									"PollForSourceChanges": true,
+									"PollForSourceChanges": false,
 									"OAuthToken": {
 										"Ref": "GitHubToken"
 									}
@@ -1458,6 +1532,34 @@
 						}
 					]
 				}
+			}
+		},
+		"PipelineInboundWebhook": {
+			"Type": "AWS::CodePipeline::Webhook",
+			"Properties": {
+				"Authentication": "GITHUB_HMAC",
+				"AuthenticationConfiguration": {
+					"SecretToken": {
+						"Ref": "GitHubToken"
+					}
+				},
+				"Filters": [
+					{
+						"JsonPath": "$.ref",
+						"MatchEquals": "refs/heads/{Branch}"
+					}
+				],
+				"TargetPipeline": {
+					"Ref": "PipelineInbound"
+				},
+				"TargetAction": "Material",
+				"TargetPipelineVersion": {
+					"Fn::GetAtt": [
+						"PipelineInbound",
+						"Version"
+					]
+				},
+				"RegisterWithThirdParty": true
 			}
 		},
 		"CodeBuildInbound": {

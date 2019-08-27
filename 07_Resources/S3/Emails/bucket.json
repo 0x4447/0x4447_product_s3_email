@@ -9,13 +9,33 @@
 		"Properties": {
 			"BucketName": { "Fn::Sub": "${EmailRestingPlace}" },
 			"LifecycleConfiguration": {
-				"Rules": [{
-					"Id": "24h",
-					"ExpirationInDays": 1,
-					"NoncurrentVersionExpirationInDays": 1,
-					"Prefix": "Today/",
-					"Status": "Enabled"
-				}]
+				"Rules": [
+					{
+						"Id": "24h",
+						"ExpirationInDays": 1,
+						"NoncurrentVersionExpirationInDays": 1,
+						"Prefix": "Today/",
+						"Status": "Enabled"
+					},
+					{
+						"Id": "Intelligent transition for Inbox",
+						"Status": "Enabled",
+						"Prefix": "Inbox/",
+						"Transition": {
+							"StorageClass": "INTELLIGENT_TIERING",
+							"TransitionInDays": 0
+						}
+					},
+					{
+						"Id": "Intelligent transition for Sent",
+						"Status": "Enabled",
+						"Prefix": "Sent/",
+						"Transition": {
+							"StorageClass": "INTELLIGENT_TIERING",
+							"TransitionInDays": 0
+						}
+					}
+				]
 			},
 			"NotificationConfiguration": {
 				"LambdaConfigurations": [
