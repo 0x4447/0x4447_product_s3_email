@@ -1,4 +1,4 @@
-# 0x4447-Product-S3-Email
+# 📫 S3 Email
 
 This stack was created out of frustration due to the fact that to this day there's no easy way to have a full email server without the overhead of installing and configuring all servers needed to handle incoming and outgoing messages. We wanted something simple, with no interface and no server management, so we came up with S3-Email. This included AWS SES as our email server (receive and send) and S3 as our database and interface. Then we tied everything together with a bit of code via AWS Lambda.
 
