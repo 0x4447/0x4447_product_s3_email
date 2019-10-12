@@ -23,7 +23,7 @@
 							},
 							"Configuration": {
 								"Owner": { "Ref": "ParamGitHubAccountName" },
-								"Repo": "0x4447-product-s3-email-lambda-outbound",
+								"Repo": "0x4447_product_s3_email_lambda_outbound",
 								"Branch": { "Ref": "Stage" },
 								"PollForSourceChanges": false,
 								"OAuthToken": { "Ref": "GitHubToken" }
