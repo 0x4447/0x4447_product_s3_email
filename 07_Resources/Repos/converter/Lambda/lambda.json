@@ -10,7 +10,7 @@
 			"Handler": "index.handler",
 			"MemorySize": 256,
 			"Role": { "Fn::GetAtt": ["LambdaEmailConverterRole", "Arn"] },
-			"Runtime": "nodejs8.10",
+			"Runtime": "nodejs12.x",
 			"Timeout": 60
 		}
 	}
