@@ -1,0 +1,8 @@
+{
+	"AutoDeployParam": {
+		"Description": "Don't change this unless you forked your own copy of the repos. And want to have auto deployment for changes in code that you made in your repos. If you set Yes, then the CodePipeline setup will get a Webhook resource, otherwise skipped, since you don't have access to our repos, and can't add a web hook entry in our repos.",
+		"Type": "String",
+		"AllowedValues" : ["No", "Yes"],
+		"Default": "No"
+	}
+}
