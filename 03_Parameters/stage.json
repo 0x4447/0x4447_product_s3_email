@@ -1,6 +1,6 @@
 {
-	"Stage": {
-		"Description": "Select what Stage are you deploying.",
+	"StageParam": {
+		"Description": "Select what type of environment are you deploying (branch of the repo).",
 		"Type": "String",
 		"AllowedValues": ["master", "development"],
 		"Default": "master",

@@ -5,7 +5,7 @@
 		"Properties": {
 			"Authentication": "GITHUB_HMAC",
 			"AuthenticationConfiguration": {
-				"SecretToken": { "Ref": "GitHubToken" }
+				"SecretToken": { "Ref": "GitHubTokenParam" }
 			},
 			"Filters": [
 				{

@@ -4,7 +4,7 @@
 		"Properties": {
 			"Name": "0x4447_s3_email_lambda_outbound",
 			"ArtifactStore": {
-				"Location": { "Ref": "CodePipelineBucketName" },
+				"Location": { "Ref": "CodePipelineArtifactsParam" },
 				"Type": "S3"
 			},
 			"RoleArn": { "Fn::GetAtt": ["PipelineOutboundRole", "Arn"] },
@@ -22,11 +22,11 @@
 								"Version": "1"
 							},
 							"Configuration": {
-								"Owner": { "Ref": "ParamGitHubAccountName" },
+								"Owner": { "Ref": "GitHubAccountOwnerParam" },
 								"Repo": "0x4447_product_s3_email_lambda_outbound",
-								"Branch": { "Ref": "Stage" },
+								"Branch": { "Ref": "StageParam" },
 								"PollForSourceChanges": false,
-								"OAuthToken": { "Ref": "GitHubToken" }
+								"OAuthToken": { "Ref": "GitHubTokenParam" }
 							},
 							"OutputArtifacts": [
 								{

@@ -1,0 +1,27 @@
+{
+	"AWS::CloudFormation::Interface" : {
+		"ParameterGroups": [
+			{
+				"Label" : { "default" : "Basics" },
+				"Parameters" : [ "CodePipelineArtifactsParam" ]
+			},
+			{
+				"Label" : { "default" : "GitHub" },
+				"Parameters" : [ "GitHubAccountOwnerParam", "GitHubTokenParam", "StageParam", "AutoDeployParam" ]
+			},
+			{
+				"Label" : { "default" : "Product Configuration" },
+				"Parameters" : [ "EmailRestingPlace"]
+			}
+		],
+		"ParameterLabels": {
+			"CodePipelineArtifactsParam": { "default" : "CodePipeline Artifacts" },
+			"GitHubTokenParam": { "default" : "GitHub Token" },
+			"GitHubAccountOwnerParam": { "default" : "GitHub Owner" },
+			"StageParam": { "default" : "Deployment Stage" },
+			"AutoDeployParam": { "default" : "Autodeployment" },
+
+			"EmailRestingPlace": { "default" : "Email Bucket Name" }
+		}
+	}
+}

@@ -10,7 +10,7 @@
 					{
 						"Effect": "Allow",
 						"Action": "s3:*",
-						"Resource": { "Fn::Sub": "arn:aws:s3:::${CodePipelineBucketName}/*"}
+						"Resource": { "Fn::Sub": "arn:aws:s3:::${CodePipelineArtifactsParam}/*"}
 					}
 				]
 			}
