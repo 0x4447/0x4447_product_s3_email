@@ -1,0 +1,3 @@
+{
+	"GitHubAutodeploymentCondition": { "Fn::Equals": [ {"Ref": "AutoDeployParam"}, "Yes"] }
+}
