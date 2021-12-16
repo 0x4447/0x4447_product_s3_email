@@ -1,7 +1,7 @@
 # How to support the project
 
 <img align="left" style="float: left; margin: 0 10px 0 0; height: 35px;" src="https://github.com/0x4447/0x4447_product_s3_email/blob/0d36bbbcfd47a4342df94c40cff8fa09c9ce8822/aws_marketplace.png?raw=true"></a>
-This solution is free for anyone to use and learn from. If you’d like to see more projects like this one, consider using some of our products from the [AWS Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=80edcebf-11fb-4c36-a3f4-49eb40b518a3) or share them with someone you might think would be interested in using them.
+This solution is free for anyone to use and learn from. If you’d like to see more projects like this one, consider using some of our products from the [AWS Marketplace](https://products.0x4447.com/) or share them with someone you might think would be interested in using them.
 
 # 📫 S3 Email
 
