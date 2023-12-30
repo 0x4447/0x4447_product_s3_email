@@ -104,9 +104,9 @@ You have to add your domain and confirm that you own it. Follow these steps to d
 Deployment creates SES `rule sets`. This should be enabled by default on fresh AWS accounts, but on accounts where you already had some rules, this won't work. This behavior is a known bug by AWS in CloudFormation. Taking the following steps will enable the rule:
 
 1. Go to the SES Dashboard.
-1. Click `Rule Sets` on the left side menu.
-1. Check `0x4447_S3_Email` on the `Inactive Rule Sets` tab.
-1. Hit `Set as Active Rule Set` to activate the rule.
+1. Click `Email receiving` on the left side menu.
+1. Check `0x4447_S3_Email` on the `All rule sets` tab.
+1. Click `Set as active` to activate the rule.
 
 ### Attach user to the IAM Group
 
