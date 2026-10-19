@@ -66,10 +66,8 @@ All you need to do to deploy this stack is click the button to the left and foll
 
 The stack takes advantage of AWS S3, AWS SES, AWS Lambda, and the AWS Trigger system to tie everything together. You'll get:
 
-- 1x SES Rule Sets
-- 2x S3 Bucket
-  - 1x for CodePipeline to store artifacts
-  - 1x for the emails
+- 1x SES Receipt Rule Set with 1x Receipt Rule
+- 1x S3 Bucket for the emails (the CodePipeline artifacts bucket is *not* created by this stack, it has to exist already - see the `CodePipeline Artifacts` parameter)
 - 3x CodePipelines
 - 3x CodeBuilds
 - 3x Lambdas
