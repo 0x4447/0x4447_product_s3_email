@@ -10,7 +10,7 @@
 			"Handler": "index.handler",
 			"MemorySize": 256,
 			"Role": { "Fn::GetAtt": ["LambdaEmailOutboundRole", "Arn"] },
-			"Runtime": "nodejs12.x",
+			"Runtime": "nodejs24.x",
 			"Timeout": 60,
 			"Environment": {
 				"Variables" : {
